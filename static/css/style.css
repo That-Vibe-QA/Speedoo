@@ -1,4 +1,5 @@
 :root {
+  /* Default Dark Mode Theme */
   --bg-primary: #0f172a;
   --bg-surface: #1e293b;
   --bg-card: #182234;
@@ -17,11 +18,35 @@
   --char-incorrect: #ef4444;
   --char-pending: #64748b;
   --char-cursor: #fbbf24;
+  --badge-bg: #273549;
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
   --font-mono: "SF Mono", "Cascadia Code", "Fira Code", Menlo, Monaco, Consolas, monospace;
+}
+
+/* Light Mode Overrides */
+[data-theme="light"] {
+  --bg-primary: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-card: #ffffff;
+  --bg-input: #f1f5f9;
+  --border-color: #e2e8f0;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --accent: #0284c7;
+  --accent-hover: #0369a1;
+  --accent-glow: rgba(2, 132, 199, 0.2);
+  --success: #059669;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --char-correct: #0284c7;
+  --char-incorrect: #dc2626;
+  --char-pending: #94a3b8;
+  --char-cursor: #d97706;
+  --badge-bg: #e2e8f0;
 }
 
 * {
@@ -106,12 +131,33 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 }
 
 .user-badge {
-  background-color: #273549;
+  background-color: var(--badge-bg);
   padding: 0.25rem 0.65rem;
   border-radius: var(--radius-sm);
   font-size: 0.85rem;
   color: var(--accent);
   font-weight: 600;
+}
+
+/* Theme Toggle Button */
+.theme-toggle-btn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  padding: 0.3rem 0.65rem;
+  font-size: 1rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.theme-toggle-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background-color: var(--bg-input);
 }
 
 /* Layout container */
@@ -217,9 +263,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   font-weight: 800;
   letter-spacing: -1px;
   margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, #f8fafc, #94a3b8);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--text-primary);
 }
 
 .hero-tagline {
