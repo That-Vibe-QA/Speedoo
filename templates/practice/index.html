@@ -192,6 +192,12 @@
 
 {% block scripts %}
 <script>
+// Prevent browser auto-scroll on refresh so landing hero is always shown first
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
+window.scrollTo(0, 0);
+
 document.addEventListener('DOMContentLoaded', () => {
   let currentPassages = [];
   let selectedPassage = null;
@@ -289,7 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       engine.renderText();
-      hiddenInput.focus();
+      hiddenInput.focus({ preventScroll: true });
     } catch (err) {
       console.error("Failed to start practice session:", err);
     }
