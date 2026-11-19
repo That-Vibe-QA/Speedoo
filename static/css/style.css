@@ -527,6 +527,62 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   z-index: 9999;
 }
 
+/* Lightning Bolt Pulse & Electric Loader */
+.lightning-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  padding: 2.5rem 1rem;
+}
+
+.lightning-bolt-icon {
+  font-size: 2.75rem;
+  display: inline-block;
+  animation: lightningStrike 1.2s infinite ease-in-out;
+  filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.7));
+}
+
+.lightning-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+  animation: electricPulse 1.2s infinite ease-in-out;
+}
+
+@keyframes lightningStrike {
+  0%, 100% {
+    transform: scale(0.9) rotate(-4deg);
+    opacity: 0.6;
+    filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.4));
+  }
+  20% {
+    transform: scale(1.25) rotate(6deg);
+    opacity: 1;
+    filter: drop-shadow(0 0 25px #fbbf24) drop-shadow(0 0 40px #ffffff);
+  }
+  35% {
+    transform: scale(0.95) rotate(-2deg);
+    opacity: 0.75;
+  }
+  50% {
+    transform: scale(1.15) rotate(4deg);
+    opacity: 1;
+    filter: drop-shadow(0 0 20px #fbbf24);
+  }
+  70% {
+    transform: scale(0.92) rotate(0deg);
+    opacity: 0.7;
+  }
+}
+
+@keyframes electricPulse {
+  0%, 100% { opacity: 0.6; }
+  20%, 50% { opacity: 1; color: var(--text-primary); }
+}
+
 .congrats-header {
   font-size: 2.2rem;
   font-weight: 800;
