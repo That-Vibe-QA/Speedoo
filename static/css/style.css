@@ -119,6 +119,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   color: var(--text-muted);
   margin-top: 2.5px;
   padding-left: 3px;
+  margin-top: 2.5px;
+  padding-left: 3px;
 }
 
 .brand-icon {
