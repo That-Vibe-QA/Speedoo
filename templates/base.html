@@ -20,7 +20,10 @@
     <nav class="navbar">
       <a href="{{ url_for('practice.index') }}" class="nav-brand">
         <span class="brand-icon">⚡</span>
-        <span>{{ app_name }}</span>
+        <div class="brand-text-container">
+          <span class="brand-title">{{ app_name }}</span>
+          <span class="brand-subtitle">A PazhaTholi Product</span>
+        </div>
       </a>
 
       <ul class="nav-menu">
