@@ -100,7 +100,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .brand-text-container {
   display: flex;
   flex-direction: column;
-  line-height: 1.15;
+  justify-content: center;
 }
 
 .brand-title {
@@ -108,14 +108,16 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   font-size: 1.35rem;
   letter-spacing: -0.5px;
   color: var(--text-primary);
+  line-height: 1.1;
 }
 
 .brand-subtitle {
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 600;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.8px;
   text-transform: uppercase;
   color: var(--text-muted);
+  margin-top: 5px;
 }
 
 .brand-icon {
