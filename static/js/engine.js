@@ -36,6 +36,9 @@ class SpeedooEngine {
     this.backspaces = 0;
     this.wpm = 0.0;
     this.accuracy = 100.0;
+
+    // Track detailed mistake logs: { index, expected, typed, word }
+    this.mistakesLog = [];
   }
 
   setTargetText(text) {
@@ -140,10 +143,13 @@ class SpeedooEngine {
       const targetChar = this.targetText[this.typedChars.length];
       
       this.totalScoredKeystrokes += 1;
+      const curIndex = this.typedChars.length;
       if (char === targetChar) {
         this.correctKeystrokes += 1;
       } else {
         this.incorrectAttempts += 1;
+        // Record mistake details with surrounding context word
+        this.recordMistake(curIndex, targetChar, char);
       }
 
       this.typedChars.push(char);
@@ -162,6 +168,25 @@ class SpeedooEngine {
         this.finish();
       }
     }
+  }
+
+  recordMistake(index, expected, typed) {
+    let wordStart = index;
+    while (wordStart > 0 && this.targetText[wordStart - 1] !== ' ') {
+      wordStart--;
+    }
+    let wordEnd = index;
+    while (wordEnd < this.targetText.length && this.targetText[wordEnd] !== ' ') {
+      wordEnd++;
+    }
+    const contextWord = this.targetText.substring(wordStart, wordEnd) || '(space)';
+
+    this.mistakesLog.push({
+      index: index,
+      expected: expected === ' ' ? '(space)' : expected,
+      typed: typed === ' ' ? '(space)' : typed,
+      word: contextWord
+    });
   }
 
   computeMetrics() {
@@ -287,7 +312,9 @@ class SpeedooEngine {
         elapsedSeconds: this.elapsedSeconds,
         incorrectAttempts: this.incorrectAttempts,
         backspaces: this.backspaces,
-        correctChars: this.correctKeystrokes
+        correctChars: this.correctKeystrokes,
+        mistakesLog: this.mistakesLog,
+        targetText: this.targetText
       });
     }
   }

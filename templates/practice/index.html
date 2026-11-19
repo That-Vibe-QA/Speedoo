@@ -137,6 +137,40 @@
         </div>
       </div>
 
+      <!-- Mistake Analysis & Review Section -->
+      <div id="mistakeAnalysisSection" style="margin: 1.5rem 0; text-align: left; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+          <h3 style="font-size: 1.1rem; display: flex; align-items: center; gap: 0.4rem;">
+            🔍 Mistake Analysis
+          </h3>
+          <span id="mistakeSummaryBadge" class="badge badge-medium">0 Mistakes</span>
+        </div>
+        
+        <p id="mistakeIntro" style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.85rem;">
+          Review the specific keys and words where errors occurred:
+        </p>
+
+        <!-- Visual Passage Mistake Map -->
+        <div id="passageMistakeMap" style="font-family: var(--font-mono); font-size: 1.05rem; line-height: 1.8; background: var(--bg-card); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); margin-bottom: 1rem; word-break: break-word; white-space: pre-wrap;">
+        </div>
+
+        <!-- Detailed Breakdown List -->
+        <div id="mistakeListContainer" style="max-height: 200px; overflow-y: auto;">
+          <table class="table" style="font-size: 0.85rem;">
+            <thead>
+              <tr>
+                <th>Word</th>
+                <th>Expected Key</th>
+                <th>Typed Key</th>
+                <th>Position</th>
+              </tr>
+            </thead>
+            <tbody id="mistakeTableBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem;">
         <button type="button" class="btn btn-primary btn-lg" id="retryBtn">
           🔁 Try Again
@@ -323,12 +357,68 @@ document.addEventListener('DOMContentLoaded', () => {
     render();
   }
 
+  function renderMistakeReview(results) {
+    const mistakes = results.mistakesLog || [];
+    const targetText = results.targetText || "";
+    const badge = document.getElementById('mistakeSummaryBadge');
+    const intro = document.getElementById('mistakeIntro');
+    const passageMap = document.getElementById('passageMistakeMap');
+    const tableBody = document.getElementById('mistakeTableBody');
+    const tableContainer = document.getElementById('mistakeListContainer');
+
+    badge.innerText = `${mistakes.length} Mistake${mistakes.length === 1 ? '' : 's'}`;
+
+    if (mistakes.length === 0) {
+      badge.className = "badge badge-easy";
+      intro.innerText = "Flawless typing! You made zero keystroke errors.";
+      passageMap.innerHTML = `<span style="color: var(--success); font-weight: 600;">✨ 100% Precision — Every single keystroke was accurate!</span>`;
+      tableContainer.style.display = 'none';
+      return;
+    }
+
+    badge.className = "badge badge-hard";
+    intro.innerText = `You had ${mistakes.length} error attempt${mistakes.length === 1 ? '' : 's'}. Marked below in red:`;
+    tableContainer.style.display = 'block';
+
+    // Build index set of mistakes for quick lookup
+    const mistakeIndices = new Set(mistakes.map(m => m.index));
+
+    // Render interactive passage mistake map
+    let mapHtml = '';
+    for (let i = 0; i < targetText.length; i++) {
+      const char = targetText[i];
+      const displayChar = char === ' ' ? '&nbsp;' : char;
+      if (mistakeIndices.has(i)) {
+        mapHtml += `<span style="background-color: var(--danger); color: #fff; padding: 1px 3px; border-radius: 3px; font-weight: 700; text-decoration: underline wavy #ffc0c0;" title="Error occurred here">${displayChar}</span>`;
+      } else {
+        mapHtml += `<span>${displayChar}</span>`;
+      }
+    }
+    passageMap.innerHTML = mapHtml;
+
+    // Render detailed table rows
+    let rowsHtml = '';
+    mistakes.forEach(m => {
+      rowsHtml += `
+        <tr>
+          <td><strong style="color: var(--text-primary); font-family: var(--font-mono);">${m.word}</strong></td>
+          <td><code style="color: var(--success); font-weight: 700; background: rgba(16, 185, 129, 0.15); padding: 2px 6px; border-radius: 4px;">${m.expected}</code></td>
+          <td><code style="color: var(--danger); font-weight: 700; background: rgba(239, 68, 68, 0.15); padding: 2px 6px; border-radius: 4px;">${m.typed}</code></td>
+          <td style="color: var(--text-muted);">Char #${m.index + 1}</td>
+        </tr>
+      `;
+    });
+    tableBody.innerHTML = rowsHtml;
+  }
+
   function showResults(results) {
     document.getElementById('resWpm').innerText = results.wpm;
     document.getElementById('resAccuracy').innerText = `${results.accuracy}%`;
     document.getElementById('resTime').innerText = `${results.elapsedSeconds.toFixed(1)}s`;
     document.getElementById('resErrors').innerText = results.incorrectAttempts;
     document.getElementById('resBackspaces').innerText = results.backspaces;
+
+    renderMistakeReview(results);
 
     resultsSection.style.display = 'block';
     resultsSection.scrollIntoView({ behavior: 'smooth' });
