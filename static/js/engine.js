@@ -157,8 +157,8 @@ class SpeedooEngine {
       this.computeMetrics();
       this.renderText();
 
-      // Check if finished in completion mode
-      if (this.mode === 'completion' && this.typedChars.join('') === this.targetText) {
+      // Check if user has finished the entire text (both timed and completion modes)
+      if (this.typedChars.join('') === this.targetText) {
         this.finish();
       }
     }

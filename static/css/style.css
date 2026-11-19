@@ -434,7 +434,29 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   color: var(--char-pending);
 }
 
-/* Hidden Test Input */
+/* Confetti celebration canvas */
+#confettiCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.congrats-header {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-bottom: 0.35rem;
+  animation: bounceCongrats 0.6s ease;
+}
+
+@keyframes bounceCongrats {
+  0% { transform: scale(0.85); opacity: 0; }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); opacity: 1; }
+}
 .typing-input {
   position: absolute;
   opacity: 0;

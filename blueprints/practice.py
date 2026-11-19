@@ -185,13 +185,16 @@ def submit_events(attempt_id):
     )
 
     should_finish = False
-    if is_timed and (time_expired or elapsed >= (attempt.duration_seconds or 60)):
+    if attempt.is_completed:
+        # Passage finished! Stop timer and finalize attempt immediately
+        should_finish = True
+        attempt.elapsed_seconds = elapsed
+        attempt.wpm = ScoringService.calculate_wpm(attempt.correct_chars, attempt.elapsed_seconds)
+    elif is_timed and (time_expired or elapsed >= (attempt.duration_seconds or 60)):
         should_finish = True
         attempt.elapsed_seconds = float(attempt.duration_seconds)
         # Recalculate WPM with exact duration
         attempt.wpm = ScoringService.calculate_wpm(attempt.correct_chars, attempt.elapsed_seconds)
-    elif not is_timed and attempt.is_completed:
-        should_finish = True
 
     if should_finish:
         attempt.status = 'completed'

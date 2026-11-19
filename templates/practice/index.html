@@ -108,14 +108,15 @@
   <!-- Results Screen Modal/Card (Hidden until test completion) -->
   <div id="resultsSection" style="display: none; margin-top: 1.5rem;">
     <div class="card results-card">
-      <h2 style="color: var(--accent); margin-bottom: 0.25rem;">Test Complete!</h2>
-      <p style="color: var(--text-secondary); font-size: 0.95rem;">
-        Here are your server-validated results. Practice regularly to push your speed higher!
+      <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎉 🥳 🎊</div>
+      <h2 class="congrats-header" style="color: var(--text-primary);">Congratulations!</h2>
+      <p style="color: var(--text-secondary); font-size: 1.05rem; margin-bottom: 0.5rem;">
+        You completed the passage! Here is your official final score:
       </p>
 
       <div class="results-metrics">
-        <div class="result-metric">
-          <div class="result-val" id="resWpm">0</div>
+        <div class="result-metric" style="border: 2px solid var(--border-color);">
+          <div class="result-val" id="resWpm" style="font-size: 2.75rem;">0</div>
           <div class="result-lbl">Final WPM</div>
         </div>
         <div class="result-metric">
@@ -136,17 +137,23 @@
         </div>
       </div>
 
-      <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+      <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem;">
         <button type="button" class="btn btn-primary btn-lg" id="retryBtn">
           🔁 Try Again
         </button>
-        <a href="{{ url_for('competition.list_competitions') }}" class="btn btn-secondary btn-lg">
+        <button type="button" class="btn btn-secondary btn-lg" id="nextPassageResultsBtn">
+          ➡️ Next Passage
+        </button>
+        <a href="{{ url_for('competition.list_competitions') }}" class="btn btn-outline btn-lg">
           🏆 Join a Competition
         </a>
       </div>
     </div>
   </div>
 </section>
+
+<!-- Canvas for Party Poppers & Confetti -->
+<canvas id="confettiCanvas"></canvas>
 {% endblock %}
 
 {% block scripts %}
@@ -254,6 +261,68 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Particle Poppers / Confetti Engine
+  function launchPoppers() {
+    const canvas = document.getElementById('confettiCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const pieces = [];
+    const colors = ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#f97316', '#ffffff'];
+
+    // Spawn 140 celebratory particles
+    for (let i = 0; i < 140; i++) {
+      pieces.push({
+        x: canvas.width / 2 + (Math.random() - 0.5) * 200,
+        y: canvas.height * 0.45 + (Math.random() - 0.5) * 80,
+        vx: (Math.random() - 0.5) * 18,
+        vy: (Math.random() - 0.85) * 16,
+        size: Math.random() * 8 + 5,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        rotation: Math.random() * 360,
+        rotationSpeed: (Math.random() - 0.5) * 10,
+        alpha: 1,
+        decay: Math.random() * 0.008 + 0.006
+      });
+    }
+
+    let animId;
+    function render() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let alive = 0;
+
+      for (let p of pieces) {
+        if (p.alpha > 0) {
+          alive++;
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.35; // Gravity
+          p.vx *= 0.98; // Friction
+          p.rotation += p.rotationSpeed;
+          p.alpha -= p.decay;
+
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, p.alpha);
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rotation * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+          ctx.restore();
+        }
+      }
+
+      if (alive > 0) {
+        animId = requestAnimationFrame(render);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        cancelAnimationFrame(animId);
+      }
+    }
+    render();
+  }
+
   function showResults(results) {
     document.getElementById('resWpm').innerText = results.wpm;
     document.getElementById('resAccuracy').innerText = `${results.accuracy}%`;
@@ -263,6 +332,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     resultsSection.style.display = 'block';
     resultsSection.scrollIntoView({ behavior: 'smooth' });
+
+    // Trigger poppers & confetti celebration!
+    launchPoppers();
   }
 
   // Key event bindings
@@ -325,6 +397,13 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('retryBtn').addEventListener('click', () => {
     initTest();
   });
+
+  const nextBtn = document.getElementById('nextPassageResultsBtn');
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      document.getElementById('newPassageBtn').click();
+    });
+  }
 
   // Start by loading initial passages
   loadPassages();
