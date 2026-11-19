@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Manage: {{ competition.title }} — Speedoo Admin{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+  <div>
+    <h2>{{ competition.title }}</h2>
+    <div style="font-size: 0.95rem; color: var(--text-secondary);">
+      Join Code: <code>{{ competition.join_code }}</code> •
+      Status: <span class="badge {% if competition.status == 'in_progress' %}badge-hard{% elif competition.status == 'completed' %}badge-easy{% else %}badge-medium{% endif %}">{{ competition.status }}</span> •
+      Format: <strong>{{ 'Timed (' ~ competition.duration_seconds ~ 's)' if competition.format == 'timed' else 'First-to-Complete' }}</strong>
+    </div>
+  </div>
+  <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+    {% if competition.status == 'scheduled' %}
+      <a href="{{ url_for('admin.edit_competition', comp_id=competition.id) }}" class="btn btn-secondary btn-sm">Edit</a>
+      <form method="POST" action="{{ url_for('admin.start_competition_manually', comp_id=competition.id) }}">
+        <button type="submit" class="btn btn-primary btn-sm" onclick="return confirm('Launch competition immediately for all participants?')">
+          ▶ Start Now
+        </button>
+      </form>
+      <form method="POST" action="{{ url_for('admin.cancel_competition', comp_id=competition.id) }}">
+        <button type="submit" class="btn btn-outline btn-sm" style="color: var(--danger); border-color: var(--danger);" onclick="return confirm('Cancel this competition?')">
+          Cancel Competition
+        </button>
+      </form>
+    {% elif competition.status == 'in_progress' %}
+      <form method="POST" action="{{ url_for('admin.finalize_competition', comp_id=competition.id) }}">
+        <button type="submit" class="btn btn-primary btn-sm" onclick="return confirm('Finalize competition and lock results?')">
+          🏁 Finalize Results
+        </button>
+      </form>
+    {% endif %}
+    <a href="{{ url_for('admin.export_csv', comp_id=competition.id) }}" class="btn btn-outline btn-sm">
+      📥 Export CSV
+    </a>
+  </div>
+</div>
+
+<!-- Passage Details Card -->
+<div class="card" style="margin-bottom: 1.5rem;">
+  <h4 style="margin-bottom: 0.5rem;">Assigned Passage: {{ competition.passage.title }} ({{ competition.passage.difficulty|upper }})</h4>
+  <p style="font-family: var(--font-mono); font-size: 0.95rem; color: var(--text-secondary); background: var(--bg-input); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+    {{ competition.passage.content }}
+  </p>
+</div>
+
+<!-- Leaderboard & Participants -->
+<div class="card">
+  <h3 style="margin-bottom: 1rem;">Live Participant Results & Auditing</h3>
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Participant</th>
+          <th>WPM</th>
+          <th>Accuracy</th>
+          <th>Time</th>
+          <th>Incorrect Keystrokes</th>
+          <th>Eligible</th>
+          <th>Status</th>
+          <th>Flag</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in ranked %}
+          {% set att = item.attempt %}
+          <tr>
+            <td><strong>{{ '#' ~ item.rank if item.rank else '-' }}</strong></td>
+            <td>
+              <strong>{{ att.user.username }}</strong>
+              {% if item.is_winner %}<span class="badge badge-winner" style="margin-left: 5px;">WINNER</span>{% endif %}
+              <br><small style="color: var(--text-muted);">{{ att.user.email }}</small>
+            </td>
+            <td><span style="font-family: var(--font-mono); font-weight: 700; color: var(--accent);">{{ att.wpm }}</span></td>
+            <td>{{ att.accuracy }}%</td>
+            <td>{{ att.elapsed_seconds|round(2) }}s</td>
+            <td>{{ att.incorrect_attempts }}</td>
+            <td>
+              {% if item.is_eligible %}
+                <span style="color: var(--success); font-weight: 600;">Yes</span>
+              {% else %}
+                <span style="color: var(--danger); font-weight: 600;">No (&lt;{{ competition.min_accuracy }}%)</span>
+              {% endif %}
+            </td>
+            <td><span class="badge badge-medium">{{ att.status }}</span></td>
+            <td>
+              {% if att.suspicious_flag %}
+                <span style="color: var(--danger);" title="{{ att.suspicious_reason }}">⚠️ {{ att.suspicious_reason }}</span>
+              {% else %}
+                <span style="color: var(--text-muted);">Clean</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+              No attempts submitted yet. Active participants in lobby: {{ participants|length }}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+

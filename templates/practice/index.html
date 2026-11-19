@@ -1,0 +1,334 @@
+{% extends "base.html" %}
+
+{% block title %}Speedoo — Precision Typing Practice & Competitions{% endblock %}
+
+{% block content %}
+<!-- Welcoming Hero -->
+<section class="hero">
+  <h1>Master Your Typing Speed</h1>
+  <div class="hero-tagline">{{ app_tagline }}</div>
+  <p class="hero-description">
+    Test your words per minute and keystroke accuracy with precision server scoring.
+    Practice on your own or battle against other typists in synchronized competitions.
+  </p>
+  <div class="hero-actions">
+    <a href="#typingArea" class="btn btn-primary btn-lg" id="jumpPracticeBtn">Practice Typing</a>
+    <a href="{{ url_for('competition.join') }}" class="btn btn-secondary btn-lg">Join Competition</a>
+  </div>
+</section>
+
+<!-- Main Practice Station -->
+<section id="typingArea" style="margin-top: 1.5rem;">
+  <!-- Test Configuration Bar -->
+  <div class="controls-bar">
+    <!-- Test Format Mode -->
+    <div class="control-group">
+      <span class="control-label">Mode:</span>
+      <div class="pill-group" id="modeSelector">
+        <button type="button" class="pill-btn active" data-mode="timed">Timed</button>
+        <button type="button" class="pill-btn" data-mode="completion">Paragraph</button>
+      </div>
+    </div>
+
+    <!-- Duration Pill (visible in timed mode) -->
+    <div class="control-group" id="durationGroup">
+      <span class="control-label">Time:</span>
+      <div class="pill-group" id="durationSelector">
+        <button type="button" class="pill-btn" data-duration="30">30s</button>
+        <button type="button" class="pill-btn active" data-duration="60">1m</button>
+        <button type="button" class="pill-btn" data-duration="120">2m</button>
+        <button type="button" class="pill-btn" data-duration="300">5m</button>
+      </div>
+    </div>
+
+    <!-- Difficulty Pill -->
+    <div class="control-group">
+      <span class="control-label">Difficulty:</span>
+      <div class="pill-group" id="difficultySelector">
+        <button type="button" class="pill-btn" data-difficulty="easy">Easy</button>
+        <button type="button" class="pill-btn active" data-difficulty="medium">Medium</button>
+        <button type="button" class="pill-btn" data-difficulty="hard">Hard</button>
+      </div>
+    </div>
+
+    <div>
+      <button type="button" class="btn btn-outline btn-sm" id="newPassageBtn" title="Load another passage">
+        🔄 New Passage
+      </button>
+    </div>
+  </div>
+
+  <!-- Live Stats Display -->
+  <div class="stats-bar">
+    <div class="stat-box">
+      <div class="stat-value" id="displayTimer">60s</div>
+      <div class="stat-label" id="timerLabel">Time Remaining</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value" id="displayWpm">0</div>
+      <div class="stat-label">Words Per Minute (WPM)</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value" id="displayAccuracy">100%</div>
+      <div class="stat-label">Accuracy</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value" id="displayProgress">0%</div>
+      <div class="stat-label">Progress</div>
+    </div>
+  </div>
+
+  <!-- Active Interactive Typing Box -->
+  <div class="typing-box" id="typingContainer" tabindex="0" role="region" aria-label="Typing test area">
+    <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem; display: flex; justify-content: space-between;">
+      <span id="passageTitleDisplay">Loading passage...</span>
+      <span>Click here & start typing. Timer begins on first character.</span>
+    </div>
+
+    <!-- Accessible Character Render Stream -->
+    <div class="typing-text" id="typingDisplay" aria-live="polite">
+      Select a test and start typing...
+    </div>
+
+    <!-- Hidden input to capture focus on mobile and secure events -->
+    <input
+      type="text"
+      class="typing-input"
+      id="hiddenInput"
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="off"
+      spellcheck="false"
+      onpaste="return false;"
+      ondrop="return false;"
+      aria-hidden="true"
+    />
+  </div>
+
+  <!-- Results Screen Modal/Card (Hidden until test completion) -->
+  <div id="resultsSection" style="display: none; margin-top: 1.5rem;">
+    <div class="card results-card">
+      <h2 style="color: var(--accent); margin-bottom: 0.25rem;">Test Complete!</h2>
+      <p style="color: var(--text-secondary); font-size: 0.95rem;">
+        Here are your server-validated results. Practice regularly to push your speed higher!
+      </p>
+
+      <div class="results-metrics">
+        <div class="result-metric">
+          <div class="result-val" id="resWpm">0</div>
+          <div class="result-lbl">Final WPM</div>
+        </div>
+        <div class="result-metric">
+          <div class="result-val" id="resAccuracy">100%</div>
+          <div class="result-lbl">Accuracy</div>
+        </div>
+        <div class="result-metric">
+          <div class="result-val" id="resTime">0.0s</div>
+          <div class="result-lbl">Completion Time</div>
+        </div>
+        <div class="result-metric">
+          <div class="result-val" id="resErrors">0</div>
+          <div class="result-lbl">Incorrect Keystrokes</div>
+        </div>
+        <div class="result-metric">
+          <div class="result-val" id="resBackspaces">0</div>
+          <div class="result-lbl">Backspaces</div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+        <button type="button" class="btn btn-primary btn-lg" id="retryBtn">
+          🔁 Try Again
+        </button>
+        <a href="{{ url_for('competition.list_competitions') }}" class="btn btn-secondary btn-lg">
+          🏆 Join a Competition
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  let currentPassages = [];
+  let selectedPassage = null;
+  let currentMode = 'timed';
+  let currentDuration = 60;
+  let currentDifficulty = 'medium';
+  let engine = null;
+
+  const displayTimer = document.getElementById('displayTimer');
+  const timerLabel = document.getElementById('timerLabel');
+  const displayWpm = document.getElementById('displayWpm');
+  const displayAccuracy = document.getElementById('displayAccuracy');
+  const displayProgress = document.getElementById('displayProgress');
+  const typingContainer = document.getElementById('typingContainer');
+  const hiddenInput = document.getElementById('hiddenInput');
+  const passageTitleDisplay = document.getElementById('passageTitleDisplay');
+  const resultsSection = document.getElementById('resultsSection');
+  const durationGroup = document.getElementById('durationGroup');
+
+  // Load passages from backend
+  async function loadPassages() {
+    try {
+      const res = await fetch(`/api/practice/passages?difficulty=${currentDifficulty}`);
+      const data = await res.json();
+      currentPassages = data.passages || [];
+      if (currentPassages.length > 0) {
+        // Pick random or next
+        selectedPassage = currentPassages[Math.floor(Math.random() * currentPassages.length)];
+        initTest();
+      } else {
+        passageTitleDisplay.innerText = "No passages found for this difficulty.";
+      }
+    } catch (err) {
+      console.error("Failed to load passages:", err);
+      passageTitleDisplay.innerText = "Error loading passages. Please refresh.";
+    }
+  }
+
+  async function initTest() {
+    resultsSection.style.display = 'none';
+    typingContainer.style.display = 'block';
+
+    if (!selectedPassage) return;
+
+    passageTitleDisplay.innerHTML = `<strong>${selectedPassage.title}</strong> (${selectedPassage.difficulty.toUpperCase()} • ${selectedPassage.word_count} words)`;
+
+    // Request server attempt
+    try {
+      const res = await fetch('/api/practice/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          passage_id: selectedPassage.id,
+          mode: currentMode,
+          duration: currentDuration
+        })
+      });
+
+      const data = await res.json();
+      const attemptId = data.attempt_id;
+      const syncUrl = `/api/practice/${attemptId}/events`;
+
+      // Update timer display
+      if (currentMode === 'timed') {
+        timerLabel.innerText = "Time Remaining";
+        displayTimer.innerText = `${currentDuration}s`;
+      } else {
+        timerLabel.innerText = "Elapsed Time";
+        displayTimer.innerText = `0.0s`;
+      }
+      displayWpm.innerText = "0";
+      displayAccuracy.innerText = "100%";
+      displayProgress.innerText = "0%";
+
+      // Instantiate engine
+      engine = new SpeedooEngine({
+        targetText: selectedPassage.content,
+        mode: currentMode,
+        durationSeconds: currentDuration,
+        attemptId: attemptId,
+        syncUrl: syncUrl,
+        onTick: (stats) => {
+          if (currentMode === 'timed') {
+            displayTimer.innerText = `${Math.ceil(stats.remaining)}s`;
+          } else {
+            displayTimer.innerText = `${stats.elapsed.toFixed(1)}s`;
+          }
+          displayWpm.innerText = stats.wpm;
+          displayAccuracy.innerText = `${stats.accuracy}%`;
+          displayProgress.innerText = `${stats.progress}%`;
+        },
+        onFinish: (results) => {
+          showResults(results);
+        }
+      });
+
+      engine.renderText();
+      hiddenInput.focus();
+    } catch (err) {
+      console.error("Failed to start practice session:", err);
+    }
+  }
+
+  function showResults(results) {
+    document.getElementById('resWpm').innerText = results.wpm;
+    document.getElementById('resAccuracy').innerText = `${results.accuracy}%`;
+    document.getElementById('resTime').innerText = `${results.elapsedSeconds.toFixed(1)}s`;
+    document.getElementById('resErrors').innerText = results.incorrectAttempts;
+    document.getElementById('resBackspaces').innerText = results.backspaces;
+
+    resultsSection.style.display = 'block';
+    resultsSection.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // Key event bindings
+  window.addEventListener('keydown', (e) => {
+    // If results are open or modal open, ignore
+    if (resultsSection.style.display === 'block') return;
+    if (engine && !engine.isFinished) {
+      engine.handleKeyDown(e);
+    }
+  });
+
+  typingContainer.addEventListener('click', () => {
+    hiddenInput.focus();
+  });
+
+  // Mode Selection
+  document.querySelectorAll('#modeSelector .pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#modeSelector .pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentMode = btn.dataset.mode;
+      durationGroup.style.display = currentMode === 'timed' ? 'flex' : 'none';
+      initTest();
+    });
+  });
+
+  // Duration Selection
+  document.querySelectorAll('#durationSelector .pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#durationSelector .pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentDuration = parseInt(btn.dataset.duration);
+      initTest();
+    });
+  });
+
+  // Difficulty Selection
+  document.querySelectorAll('#difficultySelector .pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#difficultySelector .pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentDifficulty = btn.dataset.difficulty;
+      loadPassages();
+    });
+  });
+
+  document.getElementById('newPassageBtn').addEventListener('click', () => {
+    if (currentPassages.length > 1) {
+      let next;
+      do {
+        next = currentPassages[Math.floor(Math.random() * currentPassages.length)];
+      } while (next.id === selectedPassage.id);
+      selectedPassage = next;
+      initTest();
+    } else {
+      loadPassages();
+    }
+  });
+
+  document.getElementById('retryBtn').addEventListener('click', () => {
+    initTest();
+  });
+
+  // Start by loading initial passages
+  loadPassages();
+});
+</script>
+{% endblock %}
+

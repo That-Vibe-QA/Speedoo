@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}Organized Competitions — Speedoo{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+  <div>
+    <h1>Typing Competitions</h1>
+    <p style="color: var(--text-secondary);">Compete head-to-head on the same passage with synchronized timers.</p>
+  </div>
+  <div>
+    <a href="{{ url_for('competition.join') }}" class="btn btn-primary">Join With Code</a>
+  </div>
+</div>
+
+<!-- Active / In-Progress Competitions -->
+{% if in_progress %}
+<div class="card" style="border-left: 4px solid var(--accent); margin-bottom: 2rem;">
+  <h3 style="margin-bottom: 1rem; color: var(--accent);">🔥 Currently In Progress</h3>
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Format</th>
+          <th>Passage Difficulty</th>
+          <th>Min. Accuracy</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for comp in in_progress %}
+        <tr>
+          <td>
+            <strong>{{ comp.title }}</strong><br>
+            <small style="color: var(--text-muted);">Code: <code>{{ comp.join_code }}</code></small>
+          </td>
+          <td>
+            {% if comp.format == 'timed' %}
+              Timed Sprint ({{ comp.duration_seconds }}s)
+            {% else %}
+              First-to-Complete
+            {% endif %}
+          </td>
+          <td>
+            <span class="badge badge-{{ comp.passage.difficulty }}">{{ comp.passage.difficulty }}</span>
+          </td>
+          <td>{{ comp.min_accuracy }}%</td>
+          <td>
+            <a href="{{ url_for('competition.room', comp_id=comp.id) }}" class="btn btn-primary btn-sm">Enter Arena</a>
+            <a href="{{ url_for('competition.leaderboard', comp_id=comp.id) }}" class="btn btn-outline btn-sm">Live Board</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<!-- Scheduled Upcoming Competitions -->
+<div class="card" style="margin-bottom: 2rem;">
+  <h3 style="margin-bottom: 1rem;">📅 Upcoming Scheduled Matches</h3>
+  {% if scheduled %}
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Format</th>
+          <th>Join Code</th>
+          <th>Scheduled Start (Local)</th>
+          <th>Slots</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for comp in scheduled %}
+        <tr>
+          <td>
+            <strong>{{ comp.title }}</strong>
+            {% if comp.description %}<br><small style="color: var(--text-muted);">{{ comp.description }}</small>{% endif %}
+          </td>
+          <td>
+            {% if comp.format == 'timed' %}
+              Timed ({{ comp.duration_seconds }}s)
+            {% else %}
+              First-to-Complete
+            {% endif %}
+          </td>
+          <td><code>{{ comp.join_code }}</code></td>
+          <td>
+            {% if comp.scheduled_start_time %}
+              <span class="local-time" data-utc="{{ comp.scheduled_start_time.isoformat() }}">
+                {{ comp.scheduled_start_time.strftime('%Y-%m-%d %H:%M UTC') }}
+              </span>
+            {% else %}
+              Manual Start
+            {% endif %}
+          </td>
+          <td>
+            {{ comp.participants|length }}{% if comp.participant_limit %} / {{ comp.participant_limit }}{% endif %}
+          </td>
+          <td>
+            <a href="{{ url_for('competition.join', code=comp.join_code) }}" class="btn btn-outline btn-sm">Join Lobby</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p style="color: var(--text-muted); text-align: center; padding: 1.5rem 0;">
+    No scheduled competitions at the moment. Check back soon or practice in solo mode!
+  </p>
+  {% endif %}
+</div>
+
+<!-- Past Completed Competitions -->
+<div class="card">
+  <h3 style="margin-bottom: 1rem;">🏁 Recently Completed</h3>
+  {% if completed %}
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Format</th>
+          <th>Passage</th>
+          <th>Participants</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for comp in completed %}
+        <tr>
+          <td><strong>{{ comp.title }}</strong></td>
+          <td>{{ 'Timed' if comp.format == 'timed' else 'First-to-Complete' }}</td>
+          <td>{{ comp.passage.title }}</td>
+          <td>{{ comp.participants|length }} typists</td>
+          <td>
+            <a href="{{ url_for('competition.leaderboard', comp_id=comp.id) }}" class="btn btn-outline btn-sm">
+              View Final Leaderboard
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p style="color: var(--text-muted); text-align: center; padding: 1rem 0;">
+    No completed competitions yet.
+  </p>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Convert UTC timestamps to user's local timezone
+document.querySelectorAll('.local-time').forEach(el => {
+  const utc = el.dataset.utc;
+  if (utc) {
+    const d = new Date(utc);
+    el.innerText = d.toLocaleString([], {
+      month: 'short', day: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+  }
+});
+</script>
+{% endblock %}
+

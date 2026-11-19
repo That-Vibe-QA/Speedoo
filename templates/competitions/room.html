@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+
+{% block title %}{{ competition.title }} — Arena — Speedoo{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+  <div>
+    <h2 style="margin-bottom: 0.25rem;">{{ competition.title }}</h2>
+    <div style="font-size: 0.9rem; color: var(--text-secondary);">
+      Format: <strong>{{ 'Timed Sprint (' ~ competition.duration_seconds ~ 's)' if competition.format == 'timed' else 'First-to-Complete Paragraph' }}</strong> •
+      Min. Accuracy: <strong>{{ competition.min_accuracy }}%</strong> •
+      Join Code: <code>{{ competition.join_code }}</code>
+    </div>
+  </div>
+  <div>
+    <a href="{{ url_for('competition.leaderboard', comp_id=competition.id) }}" class="btn btn-outline btn-sm" target="_blank">
+      📊 Live Leaderboard ↗
+    </a>
+  </div>
+</div>
+
+<!-- 1. WAITING LOBBY (Active when competition status is 'scheduled') -->
+<div id="lobbySection" class="card" style="text-align: center; padding: 3rem 1.5rem; display: none;">
+  <div style="font-size: 3rem; margin-bottom: 1rem;">⏳</div>
+  <h3>Waiting for Competition to Start</h3>
+  <p style="color: var(--text-secondary); max-width: 550px; margin: 0.5rem auto 1.5rem;">
+    All competitors type the identical passage simultaneously. The passage is kept hidden until the official countdown reaches zero.
+  </p>
+
+  <div style="background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; max-width: 400px; margin: 0 auto 1.5rem;">
+    <div style="font-size: 0.85rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 0.5rem;">
+      Countdown to Start
+    </div>
+    <div id="lobbyCountdown" style="font-size: 2.75rem; font-family: var(--font-mono); font-weight: 800; color: var(--accent);">
+      --:--
+    </div>
+    <div id="lobbySubtext" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">
+      Waiting for host or scheduled timer...
+    </div>
+  </div>
+
+  <div style="font-size: 0.95rem; color: var(--text-secondary);">
+    Active participants in lobby: <strong id="lobbyParticipantCount" style="color: var(--text-primary);">--</strong>
+  </div>
+</div>
+
+<!-- 2. ACTIVE TYPING ARENA (Revealed when competition is 'in_progress') -->
+<div id="arenaSection" style="display: none;">
+  <!-- Live Stats Bar -->
+  <div class="stats-bar">
+    <div class="stat-box">
+      <div class="stat-value" id="compDisplayTimer">--</div>
+      <div class="stat-label" id="compTimerLabel">Time</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value" id="compDisplayWpm">0</div>
+      <div class="stat-label">Words Per Minute (WPM)</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value" id="compDisplayAccuracy">100%</div>
+      <div class="stat-label">Keystroke Accuracy</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value" id="compDisplayProgress">0%</div>
+      <div class="stat-label">Progress</div>
+    </div>
+  </div>
+
+  <!-- Interactive Typing Area -->
+  <div class="typing-box" id="compTypingContainer" tabindex="0">
+    <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem; display: flex; justify-content: space-between;">
+      <span id="compPassageTitle">Passage</span>
+      <span>Disconnection protection active. Every stroke verified.</span>
+    </div>
+
+    <div class="typing-text" id="typingDisplay"></div>
+
+    <input
+      type="text"
+      class="typing-input"
+      id="compHiddenInput"
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="off"
+      spellcheck="false"
+      onpaste="return false;"
+      ondrop="return false;"
+    />
+  </div>
+</div>
+
+<!-- 3. COMPLETED ATTEMPT CARD -->
+<div id="compCompletedSection" class="card results-card" style="display: none; margin-top: 2rem;">
+  <h2 style="color: var(--accent); margin-bottom: 0.25rem;">Attempt Finished!</h2>
+  <p style="color: var(--text-secondary); font-size: 0.95rem;">
+    Your performance has been submitted and validated on the server.
+  </p>
+
+  <div class="results-metrics">
+    <div class="result-metric">
+      <div class="result-val" id="compResWpm">0</div>
+      <div class="result-lbl">Final WPM</div>
+    </div>
+    <div class="result-metric">
+      <div class="result-val" id="compResAcc">0%</div>
+      <div class="result-lbl">Accuracy</div>
+    </div>
+    <div class="result-metric">
+      <div class="result-val" id="compResTime">0s</div>
+      <div class="result-lbl">Completion Time</div>
+    </div>
+    <div class="result-metric">
+      <div class="result-val" id="compResErrors">0</div>
+      <div class="result-lbl">Incorrect Attempts</div>
+    </div>
+  </div>
+
+  <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+    <a href="{{ url_for('competition.leaderboard', comp_id=competition.id) }}" class="btn btn-primary btn-lg">
+      🏆 View Competition Leaderboard & Winners
+    </a>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const compId = {{ competition.id }};
+  const compFormat = "{{ competition.format }}";
+  const durationSec = {{ competition.duration_seconds or 0 }};
+  
+  let engine = null;
+  let pollInterval = null;
+  let attemptActive = false;
+
+  const lobbySection = document.getElementById('lobbySection');
+  const arenaSection = document.getElementById('arenaSection');
+  const compCompletedSection = document.getElementById('compCompletedSection');
+  const lobbyCountdown = document.getElementById('lobbyCountdown');
+  const lobbySubtext = document.getElementById('lobbySubtext');
+  const lobbyParticipantCount = document.getElementById('lobbyParticipantCount');
+
+  const compDisplayTimer = document.getElementById('compDisplayTimer');
+  const compTimerLabel = document.getElementById('compTimerLabel');
+  const compDisplayWpm = document.getElementById('compDisplayWpm');
+  const compDisplayAccuracy = document.getElementById('compDisplayAccuracy');
+  const compDisplayProgress = document.getElementById('compDisplayProgress');
+  const compTypingContainer = document.getElementById('compTypingContainer');
+  const compHiddenInput = document.getElementById('compHiddenInput');
+  const compPassageTitle = document.getElementById('compPassageTitle');
+
+  async function checkState() {
+    try {
+      const res = await fetch(`/competitions/${compId}/state`);
+      if (!res.ok) return;
+      const state = await res.json();
+
+      lobbyParticipantCount.innerText = state.participant_count;
+
+      if (state.status === 'scheduled') {
+        lobbySection.style.display = 'block';
+        arenaSection.style.display = 'none';
+
+        if (state.scheduled_start_time) {
+          const targetTime = new Date(state.scheduled_start_time).getTime();
+          const serverTime = new Date(state.server_time).getTime();
+          const diffMs = targetTime - serverTime;
+
+          if (diffMs > 0) {
+            const totalSec = Math.floor(diffMs / 1000);
+            const m = Math.floor(totalSec / 60);
+            const s = totalSec % 60;
+            lobbyCountdown.innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            lobbySubtext.innerText = `Starts at ${new Date(state.scheduled_start_time).toLocaleTimeString()}`;
+          } else {
+            lobbyCountdown.innerText = "00:00";
+            lobbySubtext.innerText = "Starting now...";
+          }
+        } else {
+          lobbyCountdown.innerText = "PAUSED";
+          lobbySubtext.innerText = "Waiting for administrator to manually launch.";
+        }
+      } else if (state.status === 'in_progress') {
+        lobbySection.style.display = 'none';
+
+        if (!attemptActive) {
+          attemptActive = true;
+          startOrResumeAttempt();
+        }
+      } else if (state.status === 'completed' || state.status === 'cancelled') {
+        if (pollInterval) clearInterval(pollInterval);
+        if (state.has_attempt && state.attempt_status === 'completed') {
+          showFinishedState();
+        } else {
+          window.location.href = `/competitions/${compId}/leaderboard`;
+        }
+      }
+    } catch (err) {
+      console.warn("Polling state error:", err);
+    }
+  }
+
+  async function startOrResumeAttempt() {
+    try {
+      const res = await fetch(`/competitions/${compId}/start_attempt`, { method: 'POST' });
+      const data = await res.json();
+
+      if (data.status === 'completed') {
+        showFinishedState(data);
+        return;
+      }
+
+      arenaSection.style.display = 'block';
+      compPassageTitle.innerText = data.passage.title;
+
+      const attemptId = data.attempt_id;
+      const syncUrl = `/api/practice/${attemptId}/events`;
+
+      compTimerLabel.innerText = (compFormat === 'timed') ? "Remaining" : "Elapsed";
+
+      engine = new SpeedooEngine({
+        targetText: data.passage.content,
+        mode: compFormat === 'timed' ? 'timed' : 'completion',
+        durationSeconds: durationSec,
+        attemptId: attemptId,
+        syncUrl: syncUrl,
+        isCompetition: true,
+        onTick: (stats) => {
+          if (compFormat === 'timed') {
+            compDisplayTimer.innerText = `${Math.ceil(stats.remaining)}s`;
+          } else {
+            compDisplayTimer.innerText = `${stats.elapsed.toFixed(1)}s`;
+          }
+          compDisplayWpm.innerText = stats.wpm;
+          compDisplayAccuracy.innerText = `${stats.accuracy}%`;
+          compDisplayProgress.innerText = `${stats.progress}%`;
+        },
+        onFinish: (results) => {
+          showFinishedState(results);
+        }
+      });
+
+      if (data.reconnected) {
+        engine.restoreState(data.typed_text, data.last_seq, data.wpm, data.accuracy, data.elapsed_seconds);
+      } else {
+        engine.renderText();
+      }
+
+      compHiddenInput.focus();
+    } catch (err) {
+      console.error("Failed to start/resume competition attempt:", err);
+    }
+  }
+
+  function showFinishedState(results) {
+    arenaSection.style.display = 'none';
+    lobbySection.style.display = 'none';
+    compCompletedSection.style.display = 'block';
+
+    if (results) {
+      document.getElementById('compResWpm').innerText = results.wpm;
+      document.getElementById('compResAcc').innerText = `${results.accuracy}%`;
+      document.getElementById('compResTime').innerText = `${results.elapsedSeconds.toFixed(1)}s`;
+      document.getElementById('compResErrors').innerText = results.incorrectAttempts;
+    }
+  }
+
+  // Key event bindings for competition
+  window.addEventListener('keydown', (e) => {
+    if (engine && !engine.isFinished && arenaSection.style.display === 'block') {
+      engine.handleKeyDown(e);
+    }
+  });
+
+  compTypingContainer.addEventListener('click', () => {
+    compHiddenInput.focus();
+  });
+
+  // Start polling state every 1.5 seconds
+  checkState();
+  pollInterval = setInterval(checkState, 1500);
+});
+</script>
+{% endblock %}
+

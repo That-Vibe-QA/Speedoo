@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Join Competition — Speedoo{% endblock %}
+
+{% block content %}
+<div style="max-width: 480px; margin: 2rem auto;">
+  <div class="card">
+    <h2 style="margin-bottom: 0.5rem; text-align: center;">Enter Competition Code</h2>
+    <p style="color: var(--text-secondary); text-align: center; margin-bottom: 1.75rem; font-size: 0.95rem;">
+      Enter the unique join code provided by the organizer to enter the waiting lobby.
+    </p>
+
+    <form method="POST" action="{{ url_for('competition.join') }}">
+      <div class="form-group">
+        <label class="form-label" for="join_code">Competition Code</label>
+        <input
+          type="text"
+          id="join_code"
+          name="join_code"
+          class="form-control"
+          style="text-transform: uppercase; font-family: var(--font-mono); font-size: 1.25rem; letter-spacing: 2px; text-align: center; font-weight: 700;"
+          placeholder="e.g. SPRINT"
+          value="{{ join_code or '' }}"
+          required
+          autofocus
+          autocomplete="off"
+        >
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 1rem;">
+        Join Lobby 🚀
+      </button>
+    </form>
+
+    <div style="text-align: center; margin-top: 1.5rem;">
+      <a href="{{ url_for('competition.list_competitions') }}" class="btn btn-outline btn-sm">
+        Browse Open Competitions
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

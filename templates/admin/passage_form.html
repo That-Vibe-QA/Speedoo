@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Add Passage — Speedoo Admin{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 1.5rem auto;">
+  <div class="card">
+    <h2 style="margin-bottom: 0.5rem;">Add Typing Passage</h2>
+    <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.95rem;">
+      Expand the library for solo practice tests and competitive events.
+    </p>
+
+    <form method="POST">
+      <div class="form-group">
+        <label class="form-label" for="title">Passage Title</label>
+        <input type="text" id="title" name="title" class="form-control" required placeholder="e.g. Modern Architecture">
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label" for="difficulty">Difficulty</label>
+          <select id="difficulty" name="difficulty" class="form-control">
+            <option value="easy">Easy (simple vocabulary)</option>
+            <option value="medium" selected>Medium (standard prose)</option>
+            <option value="hard">Hard (punctuation, symbols, technical)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="category">Category</label>
+          <input type="text" id="category" name="category" class="form-control" value="general" placeholder="e.g. technology, literature">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="content">Text Content</label>
+        <textarea id="content" name="content" class="form-control" rows="6" required placeholder="Enter the exact text the typist must type..."></textarea>
+      </div>
+
+      <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+        <button type="submit" class="btn btn-primary btn-lg" style="flex: 1;">
+          Save Passage
+        </button>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline btn-lg">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Leaderboard — {{ competition.title }} — Speedoo{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+  <div>
+    <h2>{{ competition.title }}</h2>
+    <div style="font-size: 0.95rem; color: var(--text-secondary);">
+      Format: <strong>{{ 'Timed' if competition.format == 'timed' else 'First-to-Complete' }}</strong> •
+      Passage: <strong>{{ competition.passage.title }}</strong> •
+      Min. Accuracy: <strong>{{ competition.min_accuracy }}%</strong>
+    </div>
+  </div>
+  <div style="display: flex; gap: 0.5rem; align-items: center;">
+    <span id="boardStatusBadge" class="badge badge-medium">Updating...</span>
+    {% if current_user.is_authenticated and current_user.is_admin %}
+      <a href="{{ url_for('admin.export_csv', comp_id=competition.id) }}" class="btn btn-outline btn-sm">
+        📥 Export CSV
+      </a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Winner Podium / Banner (Shown when finalized) -->
+<div id="winnerBanner" class="card" style="display: none; background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(99, 102, 241, 0.15)); border-color: var(--accent); text-align: center; padding: 2rem 1rem;">
+  <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">👑</div>
+  <h3 style="color: var(--text-primary); margin-bottom: 0.25rem;">Competition Winner(s)</h3>
+  <div id="winnerText" style="font-size: 1.35rem; font-weight: 700; color: var(--accent);">--</div>
+  <div id="winnerDetails" style="color: var(--text-secondary); font-size: 0.95rem; margin-top: 0.25rem;">--</div>
+</div>
+
+<!-- Leaderboard Table -->
+<div class="card">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+    <h3 id="boardTitle">Leaderboard</h3>
+    <span style="font-size: 0.85rem; color: var(--text-muted);" id="refreshIndicator">Auto-refreshing every 2s</span>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table" id="leaderboardTable">
+      <thead>
+        <tr>
+          <th style="width: 80px;">Rank</th>
+          <th>Participant</th>
+          <th>WPM</th>
+          <th>Accuracy</th>
+          <th>Time</th>
+          <th>Incorrect Keystrokes</th>
+          <th>Status</th>
+          <th>Eligibility</th>
+        </tr>
+      </thead>
+      <tbody id="leaderboardBody">
+        <tr>
+          <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+            Loading official results...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div style="text-align: center; margin-top: 1.5rem;">
+  <a href="{{ url_for('competition.list_competitions') }}" class="btn btn-secondary">
+    ← Back to Competitions
+  </a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const compId = {{ competition.id }};
+  const boardStatusBadge = document.getElementById('boardStatusBadge');
+  const boardTitle = document.getElementById('boardTitle');
+  const leaderboardBody = document.getElementById('leaderboardBody');
+  const winnerBanner = document.getElementById('winnerBanner');
+  const winnerText = document.getElementById('winnerText');
+  const winnerDetails = document.getElementById('winnerDetails');
+  const refreshIndicator = document.getElementById('refreshIndicator');
+
+  async function fetchLeaderboard() {
+    try {
+      const res = await fetch(`/competitions/${compId}/leaderboard_data`);
+      if (!res.ok) return;
+      const data = await res.json();
+
+      if (data.is_final) {
+        boardStatusBadge.innerText = "FINAL RESULTS";
+        boardStatusBadge.className = "badge badge-easy";
+        boardTitle.innerText = "Official Final Leaderboard";
+        refreshIndicator.innerText = "Results finalized.";
+      } else {
+        boardStatusBadge.innerText = "PROVISIONAL RANKINGS";
+        boardStatusBadge.className = "badge badge-medium";
+        boardTitle.innerText = "Provisional Live Leaderboard";
+      }
+
+      const rankings = data.rankings || [];
+      const winners = rankings.filter(r => r.is_winner);
+
+      if (winners.length > 0 && data.is_final) {
+        winnerBanner.style.display = 'block';
+        if (winners.length === 1) {
+          const w = winners[0];
+          winnerText.innerText = `🏆 ${w.username}`;
+          winnerDetails.innerText = `${w.wpm} WPM • ${w.accuracy}% Accuracy • ${w.elapsed_seconds}s`;
+        } else {
+          // Joint winners tie!
+          const names = winners.map(w => w.username).join(', ');
+          winnerText.innerText = `🤝 Joint Winners: ${names}`;
+          winnerDetails.innerText = `Exact Tie: ${winners[0].wpm} WPM • ${winners[0].accuracy}% Accuracy`;
+        }
+      } else {
+        winnerBanner.style.display = 'none';
+      }
+
+      if (rankings.length === 0) {
+        leaderboardBody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">No submissions yet.</td></tr>`;
+        return;
+      }
+
+      let rows = '';
+      rankings.forEach(item => {
+        let rankDisplay = item.rank !== null ? `#${item.rank}` : '-';
+        let rowClass = item.is_winner ? 'style="background-color: rgba(56, 189, 248, 0.08);"' : '';
+
+        let badgeWinner = item.is_winner ? '<span class="badge badge-winner" style="margin-left: 6px;">WINNER</span>' : '';
+        let eligibility = item.is_eligible 
+          ? '<span style="color: var(--success); font-size: 0.85rem; font-weight: 600;">Eligible</span>' 
+          : `<span style="color: var(--danger); font-size: 0.85rem;" title="Failed to meet min. accuracy or incomplete">Ineligible</span>`;
+
+        let flagSuspicious = item.suspicious ? '<span title="Suspicious activity recorded" style="color: var(--danger); margin-left:4px;">⚠️</span>' : '';
+
+        rows += `
+          <tr ${rowClass}>
+            <td><strong>${rankDisplay}</strong></td>
+            <td><strong>${item.username}</strong> ${badgeWinner} ${flagSuspicious}</td>
+            <td><span style="font-family: var(--font-mono); font-weight: 700; color: var(--accent);">${item.wpm}</span></td>
+            <td>${item.accuracy}%</td>
+            <td>${item.elapsed_seconds}s</td>
+            <td>${item.incorrect_attempts}</td>
+            <td><span class="badge ${item.status === 'completed' ? 'badge-easy' : 'badge-medium'}">${item.status}</span></td>
+            <td>${eligibility}</td>
+          </tr>
+        `;
+      });
+
+      leaderboardBody.innerHTML = rows;
+
+      // Stop polling if competition is officially completed
+      if (data.is_final && pollInterval) {
+        clearInterval(pollInterval);
+      }
+    } catch (err) {
+      console.warn("Leaderboard fetch error:", err);
+    }
+  }
+
+  fetchLeaderboard();
+  const pollInterval = setInterval(fetchLeaderboard, 2000);
+});
+</script>
+{% endblock %}
+
