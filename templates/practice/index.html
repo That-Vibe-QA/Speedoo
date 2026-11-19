@@ -155,14 +155,14 @@
         </div>
 
         <!-- Detailed Breakdown List -->
-        <div id="mistakeListContainer" style="max-height: 200px; overflow-y: auto;">
+        <div id="mistakeListContainer" style="max-height: 220px; overflow-y: auto;">
           <table class="table" style="font-size: 0.85rem;">
             <thead>
               <tr>
                 <th>Word</th>
-                <th>Expected Key</th>
-                <th>Typed Key</th>
-                <th>Position</th>
+                <th>Expected Letter</th>
+                <th>You Pressed</th>
+                <th>Location in Passage</th>
               </tr>
             </thead>
             <tbody id="mistakeTableBody">
@@ -404,13 +404,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Render detailed table rows
     let rowsHtml = '';
+    const totalChars = targetText.length;
     mistakes.forEach(m => {
+      const charNum = m.index + 1;
+      const pct = Math.round((charNum / totalChars) * 100);
       rowsHtml += `
         <tr>
-          <td><strong style="color: var(--text-primary); font-family: var(--font-mono);">${m.word}</strong></td>
+          <td><strong style="color: var(--text-primary); font-family: var(--font-mono); font-size: 0.95rem;">${m.word}</strong></td>
           <td><code style="color: var(--success); font-weight: 700; background: rgba(16, 185, 129, 0.15); padding: 2px 6px; border-radius: 4px;">${m.expected}</code></td>
           <td><code style="color: var(--danger); font-weight: 700; background: rgba(239, 68, 68, 0.15); padding: 2px 6px; border-radius: 4px;">${m.typed}</code></td>
-          <td style="color: var(--text-muted);">Char #${m.index + 1}</td>
+          <td style="color: var(--text-secondary);">Letter ${charNum} <span style="font-size: 0.8rem; color: var(--text-muted);">(${pct}% through)</span></td>
         </tr>
       `;
     });
