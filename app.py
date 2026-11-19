@@ -34,7 +34,7 @@ def create_app(config_class=Config):
             'current_year': datetime.now(timezone.utc).year,
             'app_name': 'Speedoo',
             'app_tagline': 'Type fast. Compete. Win.',
-            'company_name': 'Pazha Tholi'
+            'company_name': 'PazhaTholi'
         }
 
     # Register blueprints

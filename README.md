@@ -3,7 +3,7 @@
 
 Speedoo is a full-featured, responsive, and precision-scored typing speed test web application designed for both individual typing practice and competitive multi-user typing contests. Built with a lightweight, modular architecture using Python, Flask, SQLite/SQLAlchemy, and modern vanilla JavaScript.
 
-Developed and maintained by **Pazha Tholi**.
+Developed and maintained by **PazhaTholi**.
 
 ---
 
@@ -13,7 +13,7 @@ Developed and maintained by **Pazha Tholi**.
 - **Modern, Accessible UI**: High-contrast, dark-mode-first aesthetic with clean typography, visible focus rings, and responsive mobile-ready layout.
 - **Accessible Character States**: Correct characters, incorrect characters, and the active cursor are clearly differentiated through colors, backgrounds, and distinct styling (such as wavy underlines) without relying on color alone.
 - **Dynamic Footer & Branding**: Consistent branding featuring "Speedoo", tagline *"Type fast. Compete. Win."*, and a dynamic year copyright:
-  `© [current year] Pazha Tholi. All rights reserved.`
+  `© [current year] PazhaTholi. All rights reserved.`
 
 ### 2. Individual Practice
 - **Test Formats**:
@@ -198,6 +198,6 @@ The architecture is deliberately modular to facilitate future upgrades:
 
 ## 📄 License & Attribution
 
-Speedoo is developed by **Pazha Tholi**.  
-© {{ current_year }} Pazha Tholi. All rights reserved.
+Speedoo is developed by **PazhaTholi**.  
+© {{ current_year }} PazhaTholi. All rights reserved.
 
