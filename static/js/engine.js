@@ -105,8 +105,8 @@ class SpeedooEngine {
   handleKeyDown(e) {
     if (this.isFinished) return;
 
-    // Disallow modifiers
-    if (e.ctrlKey || e.metaKey || e.altKey) {
+    // Disallow modifiers (except Shift, AltGraph for international keyboards)
+    if (e.ctrlKey || e.metaKey) {
       if (e.key === 'v' || e.key === 'V') {
         e.preventDefault(); // Extra defense against paste shortcuts
       }
@@ -130,8 +130,8 @@ class SpeedooEngine {
       return;
     }
 
-    // Single character typing
-    if (e.key.length === 1) {
+    // Capture input (single character or multi-byte Unicode/composition char)
+    if (e.key && e.key.length >= 1 && e.key !== 'Enter' && e.key !== 'Tab' && e.key !== 'Escape' && e.key !== 'Shift' && e.key !== 'Alt') {
       e.preventDefault();
 
       if (!this.hasStarted) {
@@ -139,26 +139,27 @@ class SpeedooEngine {
         this.startLocalTimer();
       }
 
-      const char = e.key;
-      const targetChar = this.targetText[this.typedChars.length];
-      
-      this.totalScoredKeystrokes += 1;
-      const curIndex = this.typedChars.length;
-      if (char === targetChar) {
-        this.correctKeystrokes += 1;
-      } else {
-        this.incorrectAttempts += 1;
-        // Record mistake details with surrounding context word
-        this.recordMistake(curIndex, targetChar, char);
-      }
+      const inputChars = Array.from(e.key.normalize('NFC'));
+      for (const char of inputChars) {
+        const curIndex = this.typedChars.length;
+        const targetChar = this.targetText[curIndex];
+        
+        this.totalScoredKeystrokes += 1;
+        if (char === targetChar) {
+          this.correctKeystrokes += 1;
+        } else {
+          this.incorrectAttempts += 1;
+          this.recordMistake(curIndex, targetChar, char);
+        }
 
-      this.typedChars.push(char);
-      this.eventsQueue.push({
-        seq: this.nextSeq++,
-        type: 'insert',
-        char: char,
-        client_t: performance.now()
-      });
+        this.typedChars.push(char);
+        this.eventsQueue.push({
+          seq: this.nextSeq++,
+          type: 'insert',
+          char: char,
+          client_t: performance.now()
+        });
+      }
 
       this.computeMetrics();
       this.renderText();

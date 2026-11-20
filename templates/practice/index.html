@@ -21,6 +21,17 @@
 <section id="typingArea" style="margin-top: 1.5rem;">
   <!-- Test Configuration Bar -->
   <div class="controls-bar">
+    <!-- Language Selector Pill -->
+    <div class="control-group">
+      <span class="control-label">Language:</span>
+      <div class="pill-group" id="languageSelector">
+        <button type="button" class="pill-btn active" data-lang="en">English</button>
+        <button type="button" class="pill-btn" data-lang="ml">മലയാളം</button>
+        <button type="button" class="pill-btn" data-lang="hi">हिन्दी</button>
+        <button type="button" class="pill-btn" data-lang="es">Español</button>
+      </div>
+    </div>
+
     <!-- Test Format Mode -->
     <div class="control-group">
       <span class="control-label">Mode:</span>
@@ -204,6 +215,7 @@ window.scrollTo(0, 0);
 document.addEventListener('DOMContentLoaded', () => {
   let currentPassages = [];
   let selectedPassage = null;
+  let currentLanguage = 'en';
   let currentMode = 'timed';
   let currentDuration = 60;
   let currentDifficulty = 'medium';
@@ -223,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Load passages from backend
   async function loadPassages() {
     try {
-      const res = await fetch(`/api/practice/passages?difficulty=${currentDifficulty}`);
+      const res = await fetch(`/api/practice/passages?language=${currentLanguage}&difficulty=${currentDifficulty}`);
       const data = await res.json();
       currentPassages = data.passages || [];
       if (currentPassages.length > 0) {
@@ -231,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedPassage = currentPassages[Math.floor(Math.random() * currentPassages.length)];
         initTest();
       } else {
-        passageTitleDisplay.innerText = "No passages found for this difficulty.";
+        passageTitleDisplay.innerText = "No passages found for this language and difficulty.";
       }
     } catch (err) {
       console.error("Failed to load passages:", err);
@@ -450,6 +462,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   typingContainer.addEventListener('click', () => {
     hiddenInput.focus();
+  });
+
+  // Language Selection
+  document.querySelectorAll('#languageSelector .pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#languageSelector .pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentLanguage = btn.dataset.lang;
+      loadPassages();
+    });
   });
 
   // Mode Selection

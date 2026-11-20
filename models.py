@@ -39,6 +39,7 @@ class Passage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     content = db.Column(db.Text, nullable=False)
+    language = db.Column(db.String(20), nullable=False, default='en')  # 'en', 'ml', 'hi', 'es'
     difficulty = db.Column(db.String(20), nullable=False, default='medium')  # easy, medium, hard
     category = db.Column(db.String(50), default='general')
     is_active = db.Column(db.Boolean, default=True, nullable=False)

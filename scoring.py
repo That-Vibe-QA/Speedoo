@@ -1,16 +1,24 @@
+import unicodedata
 from datetime import datetime, timezone
 import math
 
 class ScoringService:
     """
-    Standardized, robust scoring engine for Speedoo.
+    Standardized, robust scoring engine for Speedoo with Multilingual & IME support.
     Scoring Rules:
     - WPM = (correctly typed characters / 5) / elapsed minutes.
     - Accuracy = correct keystrokes / total scored keystrokes * 100.
     - Backspace is a correction action, not a scored character keystroke.
     - Track incorrect attempts even if the user later corrects them.
-    - Handle empty input, zero elapsed time, punctuation, spaces, and unfinished passages consistently.
+    - Handle empty input, zero elapsed time, punctuation, spaces, non-Latin Unicode (Malayalam, Hindi, Spanish), and unfinished passages consistently.
     """
+
+    @staticmethod
+    def normalize_text(text: str) -> str:
+        """Normalizes Unicode text to NFC form for stable multi-byte character comparison."""
+        if not text:
+            return ""
+        return unicodedata.normalize('NFC', text)
 
     @staticmethod
     def calculate_wpm(correct_chars: int, elapsed_seconds: float) -> float:
@@ -29,26 +37,29 @@ class ScoringService:
         acc = (correct_keystrokes / total_scored_keystrokes) * 100.0
         return round(min(100.0, max(0.0, acc)), 1)
 
-    @staticmethod
-    def evaluate_typed_state(target_text: str, current_typed_text: str):
+    @classmethod
+    def evaluate_typed_state(cls, target_text: str, current_typed_text: str):
         """
         Calculates correct characters in the current prefix matching the target text.
         Also identifies current cursor position and whether exact match reached.
         """
+        norm_target = cls.normalize_text(target_text)
+        norm_typed = cls.normalize_text(current_typed_text)
+
         match_len = 0
-        min_len = min(len(target_text), len(current_typed_text))
+        min_len = min(len(norm_target), len(norm_typed))
         for i in range(min_len):
-            if target_text[i] == current_typed_text[i]:
+            if norm_target[i] == norm_typed[i]:
                 match_len += 1
             else:
                 break
         
-        is_exact_match = (current_typed_text == target_text)
+        is_exact_match = (norm_typed == norm_target)
         return {
             'correct_prefix_length': match_len,
             'is_exact_match': is_exact_match,
-            'current_length': len(current_typed_text),
-            'target_length': len(target_text)
+            'current_length': len(norm_typed),
+            'target_length': len(norm_target)
         }
 
     @classmethod
@@ -63,27 +74,8 @@ class ScoringService:
         existing_backspace_count: int = 0,
         expected_seq_start: int = 1
     ):
-        """
-        Replays keystroke/edit events sequentially on the server.
-        Event schema:
-        {
-          "seq": int (1-based strictly increasing),
-          "type": "insert" | "backspace",
-          "char": string (for insert),
-          "client_t": float (optional monotonic ms)
-        }
-        
-        Rules:
-        - Out-of-order sequence numbers or gap in seq triggers validation error.
-        - 'insert' adds char to typed string. It is a scored keystroke.
-          If the added char matches target_text at that index, correct_keystrokes += 1.
-          If not, incorrect_attempts += 1.
-          total_scored_keystrokes += 1.
-        - 'backspace' removes the last char from typed string (if not empty).
-          Backspace is NOT a scored character keystroke and does NOT increment total_scored_keystrokes.
-          backspace_count += 1.
-        """
-        typed = list(existing_typed_text)
+        target_norm = cls.normalize_text(target_text)
+        typed = list(cls.normalize_text(existing_typed_text))
         correct_ks = existing_correct_keystrokes
         total_ks = existing_total_scored_keystrokes
         incorrect = existing_incorrect_attempts
@@ -103,26 +95,21 @@ class ScoringService:
 
             ev_type = ev.get('type')
             if ev_type == 'insert':
-                char = ev.get('char', '')
-                if len(char) != 1:
-                    suspicious_reasons.append(f"Multi-character insertion detected: length {len(char)}")
-                    # Multi-character pasted block
-                    for c in char:
-                        idx = len(typed)
-                        total_ks += 1
-                        if idx < len(target_text) and c == target_text[idx]:
-                            correct_ks += 1
-                        else:
-                            incorrect += 1
-                        typed.append(c)
-                else:
+                raw_char = ev.get('char', '')
+                char = cls.normalize_text(raw_char)
+                
+                # Check for pasted blocks (allowing multi-char grapheme clusters from IMEs)
+                if len(char) > 4:
+                    suspicious_reasons.append(f"Large text insertion detected: length {len(char)}")
+                
+                for c in char:
                     idx = len(typed)
                     total_ks += 1
-                    if idx < len(target_text) and char == target_text[idx]:
+                    if idx < len(target_norm) and c == target_norm[idx]:
                         correct_ks += 1
                     else:
                         incorrect += 1
-                    typed.append(char)
+                    typed.append(c)
 
             elif ev_type == 'backspace':
                 backspaces += 1

@@ -14,9 +14,12 @@ def index():
 
 @practice_bp.route('/api/practice/passages', methods=['GET'])
 def get_passages():
-    """Returns available passages grouped or filtered by difficulty."""
+    """Returns available passages grouped or filtered by language and difficulty."""
+    language = request.args.get('language', 'en').lower()
     difficulty = request.args.get('difficulty', '').lower()
     query = Passage.query.filter_by(is_active=True)
+    if language:
+        query = query.filter_by(language=language)
     if difficulty in ('easy', 'medium', 'hard'):
         query = query.filter_by(difficulty=difficulty)
     passages = query.order_by(Passage.id.asc()).all()
@@ -25,6 +28,7 @@ def get_passages():
         'passages': [{
             'id': p.id,
             'title': p.title,
+            'language': getattr(p, 'language', 'en'),
             'difficulty': p.difficulty,
             'content': p.content,
             'char_count': p.character_count,
