@@ -102,6 +102,26 @@ class SpeedooEngine {
     }, 500);
   }
 
+  clearTypedWordsKeepTimer() {
+    if (!this.hasStarted || this.isFinished) return;
+
+    // Send backspaces to roll back typed buffer on server or record a reset
+    const rollbackCount = this.typedChars.length;
+    for (let i = 0; i < rollbackCount; i++) {
+      this.eventsQueue.push({
+        seq: this.nextSeq++,
+        type: 'backspace',
+        client_t: performance.now()
+      });
+    }
+
+    this.typedChars = [];
+    this.correctKeystrokes = 0;
+    this.computeMetrics();
+    this.renderText();
+    this.flushEvents();
+  }
+
   handleKeyDown(e) {
     if (this.isFinished) return;
 

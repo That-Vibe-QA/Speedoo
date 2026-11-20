@@ -62,7 +62,10 @@
       </div>
     </div>
 
-    <div>
+    <div style="display: flex; gap: 0.5rem; align-items: center;">
+      <button type="button" class="btn btn-outline btn-sm" id="resetWordsBtn" title="Clear typed words from the beginning without resetting the timer">
+        🧹 Restart Words
+      </button>
       <button type="button" class="btn btn-outline btn-sm" id="newPassageBtn" title="Load another passage">
         🔄 New Passage
       </button>
@@ -503,6 +506,13 @@ document.addEventListener('DOMContentLoaded', () => {
       currentDifficulty = btn.dataset.difficulty;
       loadPassages();
     });
+  });
+
+  document.getElementById('resetWordsBtn').addEventListener('click', () => {
+    if (engine && engine.hasStarted && !engine.isFinished) {
+      engine.clearTypedWordsKeepTimer();
+      hiddenInput.focus({ preventScroll: true });
+    }
   });
 
   document.getElementById('newPassageBtn').addEventListener('click', () => {
