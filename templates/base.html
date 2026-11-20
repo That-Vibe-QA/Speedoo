@@ -4,6 +4,49 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Speedoo{% endblock %}</title>
+  
+  <!-- Comprehensive SEO Meta Tags -->
+  <meta name="description" content="{% block meta_description %}Speedoo is a fast, precision-scored typing speed test and competition platform by PazhaTholi. Test words per minute (WPM), improve accuracy, and race other typists in live synchronized competitions.{% endblock %}">
+  <meta name="keywords" content="typing test, typing speed test, words per minute, WPM test, typing competition, touch typing, speed typing test online, PazhaTholi">
+  <meta name="author" content="PazhaTholi">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://speedoo.vercel.app{{ request.path }}">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://speedoo.vercel.app{{ request.path }}">
+  <meta property="og:title" content="Speedoo — Type fast. Compete. Win.">
+  <meta property="og:description" content="Free online typing speed test with precision scoring, mistake analysis, and synchronized typing competitions.">
+  <meta property="og:site_name" content="Speedoo">
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Speedoo — Type fast. Compete. Win.">
+  <meta name="twitter:description" content="Free online typing speed test with precision scoring, mistake analysis, and live typing races.">
+  
+  <!-- JSON-LD Structured Data for Google Rich Results -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Speedoo",
+    "url": "https://speedoo.vercel.app",
+    "description": "Precision typing speed test and organized online typing competitions.",
+    "applicationCategory": "EducationalApplication, GameApplication",
+    "operatingSystem": "All",
+    "browserRequirements": "Requires JavaScript",
+    "creator": {
+      "@type": "Organization",
+      "name": "PazhaTholi"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+
   <!-- Prevent theme flash -->
   <script>
     (function() {

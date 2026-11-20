@@ -54,6 +54,17 @@ def create_app(config_class=Config):
     app.register_blueprint(competition_bp)
     app.register_blueprint(admin_bp)
 
+    # SEO routes for robots.txt and sitemap.xml
+    from flask import send_from_directory
+
+    @app.route('/robots.txt')
+    def robots():
+        return send_from_directory(app.static_folder, 'robots.txt', mimetype='text/plain')
+
+    @app.route('/sitemap.xml')
+    def sitemap():
+        return send_from_directory(app.static_folder, 'sitemap.xml', mimetype='application/xml')
+
     @app.errorhandler(404)
     def page_not_found(e):
         return render_template('errors/404.html'), 404
