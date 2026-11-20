@@ -114,9 +114,9 @@
   <!-- Results Screen Modal/Card (Hidden until test completion) -->
   <div id="resultsSection" style="display: none; margin-top: 1.5rem;">
     <div class="card results-card">
-      <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎉 🥳 🎊</div>
-      <h2 class="congrats-header" style="color: var(--text-primary);">Congratulations!</h2>
-      <p style="color: var(--text-secondary); font-size: 1.05rem; margin-bottom: 0.5rem;">
+      <div id="resultIcon" style="font-size: 3rem; margin-bottom: 0.5rem;">🎉 🥳 🎊</div>
+      <h2 id="resultHeading" class="congrats-header" style="color: var(--text-primary);">Congratulations!</h2>
+      <p id="resultSubheading" style="color: var(--text-secondary); font-size: 1.05rem; margin-bottom: 0.5rem;">
         You completed the passage! Here is your official final score:
       </p>
 
@@ -438,13 +438,28 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('resErrors').innerText = results.incorrectAttempts;
     document.getElementById('resBackspaces').innerText = results.backspaces;
 
+    const iconEl = document.getElementById('resultIcon');
+    const headingEl = document.getElementById('resultHeading');
+    const subheadingEl = document.getElementById('resultSubheading');
+
+    if (results.isCompleted) {
+      iconEl.innerText = "🎉 🥳 🎊";
+      headingEl.innerText = "Congratulations!";
+      headingEl.style.color = "var(--text-primary)";
+      subheadingEl.innerText = "You completed the passage! Here is your official final score:";
+      launchPoppers();
+    } else {
+      iconEl.innerText = "⏰ ⏱️ ⌛";
+      headingEl.innerText = "Time's Up!";
+      headingEl.style.color = "var(--warning)";
+      const pct = Math.round((results.typedLength / (results.totalLength || 1)) * 100);
+      subheadingEl.innerText = `You completed ${pct}% of the passage before time ran out. Here is your practice score:`;
+    }
+
     renderMistakeReview(results);
 
     resultsSection.style.display = 'block';
     resultsSection.scrollIntoView({ behavior: 'smooth' });
-
-    // Trigger poppers & confetti celebration!
-    launchPoppers();
   }
 
   // Key event bindings

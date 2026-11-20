@@ -327,6 +327,7 @@ class SpeedooEngine {
     await this.flushEvents(true);
 
     if (this.onFinish) {
+      const isCompleted = (this.typedChars.join('') === this.targetText);
       this.onFinish({
         wpm: this.wpm,
         accuracy: this.accuracy,
@@ -335,7 +336,10 @@ class SpeedooEngine {
         backspaces: this.backspaces,
         correctChars: this.correctKeystrokes,
         mistakesLog: this.mistakesLog,
-        targetText: this.targetText
+        targetText: this.targetText,
+        isCompleted: isCompleted,
+        typedLength: this.typedChars.length,
+        totalLength: this.targetText.length
       });
     }
   }
