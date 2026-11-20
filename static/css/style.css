@@ -209,40 +209,98 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   font-weight: 600;
 }
 
-/* Language Selector Dropdown in Navbar */
+/* Compact Language Selector Dropdown in Navbar */
 .nav-lang-dropdown {
   position: relative;
   display: inline-flex;
   align-items: center;
 }
 
-.nav-lang-select {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
+.nav-lang-btn {
   background-color: var(--bg-card);
   color: var(--text-primary);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
-  padding: 0.35rem 1.6rem 0.35rem 0.75rem;
-  font-size: 0.85rem;
-  font-weight: 600;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
   cursor: pointer;
-  outline: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   transition: all 0.15s ease;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 0.45rem center;
-  background-size: 0.85em;
+  user-select: none;
 }
 
-.nav-lang-select:hover {
+.nav-lang-btn:hover {
   border-color: rgba(255, 255, 255, 0.3);
   background-color: var(--bg-surface);
 }
 
-.nav-lang-select:focus {
-  border-color: var(--text-primary);
+[data-theme="light"] .nav-lang-btn:hover {
+  border-color: rgba(0, 0, 0, 0.3);
+  background-color: #f4f4f5;
+}
+
+.lang-chevron {
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+}
+
+.nav-lang-btn[aria-expanded="true"] .lang-chevron {
+  transform: rotate(180deg);
+}
+
+.nav-lang-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 140px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+  padding: 0.35rem;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+[data-theme="light"] .nav-lang-menu {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+}
+
+.lang-opt {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.45rem 0.75rem;
+  text-align: left;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.15s ease;
+  width: 100%;
+}
+
+.lang-opt:hover {
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.lang-opt.active {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+[data-theme="light"] .lang-opt.active {
+  background-color: rgba(0, 0, 0, 0.06);
 }
 
 /* Theme Toggle Button */

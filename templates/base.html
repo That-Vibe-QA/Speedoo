@@ -90,14 +90,20 @@
       </ul>
 
       <div class="nav-user">
-        <!-- Language Selector Dropdown -->
-        <div class="nav-lang-dropdown">
-          <select id="globalLanguageSelect" class="nav-lang-select" aria-label="Select typing language">
-            <option value="en">🇬🇧 English</option>
-            <option value="ml">🌴 മലയാളം</option>
-            <option value="hi">🇮🇳 हिन्दी</option>
-            <option value="es">🇪🇸 Español</option>
-          </select>
+        <!-- Compact Language Selector Dropdown -->
+        <div class="nav-lang-dropdown" id="langDropdownContainer">
+          <button type="button" class="nav-lang-btn" id="langDropdownBtn" aria-expanded="false" aria-label="Select typing language">
+            <span id="currentLangLabel">EN</span>
+            <svg class="lang-chevron" viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <div class="nav-lang-menu" id="langMenu" style="display: none;">
+            <button type="button" class="lang-opt" data-lang="en">🇬🇧 English</button>
+            <button type="button" class="lang-opt" data-lang="ml">🌴 മലയാളം</button>
+            <button type="button" class="lang-opt" data-lang="hi">🇮🇳 हिन्दी</button>
+            <button type="button" class="lang-opt" data-lang="es">🇪🇸 Español</button>
+          </div>
         </div>
 
         <!-- Theme Toggle Button -->
@@ -150,24 +156,83 @@
   <script src="{{ url_for('static', filename='js/engine.js') }}"></script>
   <script>
     (function() {
+      // Theme toggle logic
       const toggleBtn = document.getElementById('themeToggleBtn');
-      if (!toggleBtn) return;
+      if (toggleBtn) {
+        function updateIcon(theme) {
+          toggleBtn.innerText = theme === 'light' ? '☀️' : '🌙';
+          toggleBtn.title = theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode';
+        }
 
-      function updateIcon(theme) {
-        toggleBtn.innerText = theme === 'light' ? '☀️' : '🌙';
-        toggleBtn.title = theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode';
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+        updateIcon(currentTheme);
+
+        toggleBtn.addEventListener('click', () => {
+          const active = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+          const next = active === 'light' ? 'dark' : 'light';
+          document.documentElement.setAttribute('data-theme', next);
+          localStorage.setItem('speedoo-theme', next);
+          updateIcon(next);
+        });
       }
 
-      const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
-      updateIcon(currentTheme);
+      // Compact Language Selector Dropdown logic
+      const langBtn = document.getElementById('langDropdownBtn');
+      const langMenu = document.getElementById('langMenu');
+      const currentLangLabel = document.getElementById('currentLangLabel');
+      const langOptions = document.querySelectorAll('.lang-opt');
 
-      toggleBtn.addEventListener('click', () => {
-        const active = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
-        const next = active === 'light' ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', next);
-        localStorage.setItem('speedoo-theme', next);
-        updateIcon(next);
-      });
+      const savedLang = localStorage.getItem('speedoo-lang') || 'en';
+      if (currentLangLabel) {
+        currentLangLabel.innerText = savedLang.toUpperCase();
+      }
+
+      function updateActiveOption(lang) {
+        langOptions.forEach(opt => {
+          if (opt.getAttribute('data-lang') === lang) {
+            opt.classList.add('active');
+          } else {
+            opt.classList.remove('active');
+          }
+        });
+      }
+      updateActiveOption(savedLang);
+
+      if (langBtn && langMenu) {
+        langBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isExpanded = langMenu.style.display === 'block';
+          langMenu.style.display = isExpanded ? 'none' : 'block';
+          langBtn.setAttribute('aria-expanded', !isExpanded);
+        });
+
+        langOptions.forEach(opt => {
+          opt.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const chosenLang = opt.getAttribute('data-lang');
+            localStorage.setItem('speedoo-lang', chosenLang);
+            if (currentLangLabel) {
+              currentLangLabel.innerText = chosenLang.toUpperCase();
+            }
+            updateActiveOption(chosenLang);
+            langMenu.style.display = 'none';
+            langBtn.setAttribute('aria-expanded', 'false');
+
+            // Dispatch global event for listeners (like practice page)
+            window.dispatchEvent(new CustomEvent('speedoo-lang-changed', {
+              detail: { language: chosenLang }
+            }));
+          });
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+          if (!document.getElementById('langDropdownContainer').contains(e.target)) {
+            langMenu.style.display = 'none';
+            langBtn.setAttribute('aria-expanded', 'false');
+          }
+        });
+      }
     })();
   </script>
   {% block scripts %}{% endblock %}

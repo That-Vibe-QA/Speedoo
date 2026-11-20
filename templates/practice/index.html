@@ -207,11 +207,7 @@ window.scrollTo(0, 0);
 document.addEventListener('DOMContentLoaded', () => {
   let currentPassages = [];
   let selectedPassage = null;
-  const globalLangSelect = document.getElementById('globalLanguageSelect');
-  let currentLanguage = localStorage.getItem('speedoo-lang') || (globalLangSelect ? globalLangSelect.value : 'en');
-  if (globalLangSelect) {
-    globalLangSelect.value = currentLanguage;
-  }
+  let currentLanguage = localStorage.getItem('speedoo-lang') || 'en';
   let currentMode = 'timed';
   let currentDuration = 60;
   let currentDifficulty = 'medium';
@@ -475,14 +471,13 @@ document.addEventListener('DOMContentLoaded', () => {
     hiddenInput.focus();
   });
 
-  // Global Language Dropdown Selection (in navbar near login)
-  if (globalLangSelect) {
-    globalLangSelect.addEventListener('change', (e) => {
-      currentLanguage = e.target.value;
-      localStorage.setItem('speedoo-lang', currentLanguage);
+  // Listen for language change from compact navbar dropdown
+  window.addEventListener('speedoo-lang-changed', (e) => {
+    if (e.detail && e.detail.language) {
+      currentLanguage = e.detail.language;
       loadPassages();
-    });
-  }
+    }
+  });
 
   // Mode Selection
   document.querySelectorAll('#modeSelector .pill-btn').forEach(btn => {
