@@ -21,17 +21,6 @@
 <section id="typingArea" style="margin-top: 1.5rem;">
   <!-- Test Configuration Bar -->
   <div class="controls-bar">
-    <!-- Language Selector Pill -->
-    <div class="control-group">
-      <span class="control-label">Language:</span>
-      <div class="pill-group" id="languageSelector">
-        <button type="button" class="pill-btn active" data-lang="en">English</button>
-        <button type="button" class="pill-btn" data-lang="ml">മലയാളം</button>
-        <button type="button" class="pill-btn" data-lang="hi">हिन्दी</button>
-        <button type="button" class="pill-btn" data-lang="es">Español</button>
-      </div>
-    </div>
-
     <!-- Test Format Mode -->
     <div class="control-group">
       <span class="control-label">Mode:</span>
@@ -218,7 +207,11 @@ window.scrollTo(0, 0);
 document.addEventListener('DOMContentLoaded', () => {
   let currentPassages = [];
   let selectedPassage = null;
-  let currentLanguage = 'en';
+  const globalLangSelect = document.getElementById('globalLanguageSelect');
+  let currentLanguage = localStorage.getItem('speedoo-lang') || (globalLangSelect ? globalLangSelect.value : 'en');
+  if (globalLangSelect) {
+    globalLangSelect.value = currentLanguage;
+  }
   let currentMode = 'timed';
   let currentDuration = 60;
   let currentDifficulty = 'medium';
@@ -467,15 +460,14 @@ document.addEventListener('DOMContentLoaded', () => {
     hiddenInput.focus();
   });
 
-  // Language Selection
-  document.querySelectorAll('#languageSelector .pill-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('#languageSelector .pill-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentLanguage = btn.dataset.lang;
+  // Global Language Dropdown Selection (in navbar near login)
+  if (globalLangSelect) {
+    globalLangSelect.addEventListener('change', (e) => {
+      currentLanguage = e.target.value;
+      localStorage.setItem('speedoo-lang', currentLanguage);
       loadPassages();
     });
-  });
+  }
 
   // Mode Selection
   document.querySelectorAll('#modeSelector .pill-btn').forEach(btn => {
