@@ -305,17 +305,36 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 
 /* Theme Toggle Button */
 .theme-toggle-btn {
-  background: transparent;
+  background: var(--bg-card);
   border: 1px solid var(--border-color);
   color: var(--text-secondary);
   border-radius: var(--radius-sm);
-  padding: 0.3rem 0.65rem;
-  font-size: 1rem;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   transition: all 0.15s ease;
+  line-height: 1;
+}
+
+.theme-toggle-btn:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: var(--text-primary);
+  background-color: var(--bg-surface);
+}
+
+[data-theme="light"] .theme-toggle-btn:hover {
+  border-color: rgba(0, 0, 0, 0.3);
+  background-color: #f4f4f5;
+}
+
+.theme-toggle-btn svg {
+  display: block;
 }
 
 .theme-toggle-btn:hover {
