@@ -54,30 +54,6 @@ SAMPLE_PASSAGES = [
         "category": "syntax",
         "content": "Did you know that fast typists balance speed (e.g., 90+ WPM) with surgical accuracy (~98%)? When complex symbols appear—such as { brackets, semicolons; hyphens-and-dashes, and \"double quotes\"!—their pace remains rhythmic and unhurried."
     },
-    # MALAYALAM (EASY)
-    {
-        "title": "പ്രഭാത നടത്തം (Morning Walk)",
-        "language": "ml",
-        "difficulty": "easy",
-        "category": "lifestyle",
-        "content": "പ്രഭാത സൂര്യൻ മനോഹരമായി തിളങ്ങി. മരങ്ങളിൽ കിളികൾ മധുരമായി പാടുന്നുണ്ടായിരുന്നു. തണുത്ത കാറ്റ് ഇലകളെ തൊട്ടുണർത്തി."
-    },
-    # MALAYALAM (MEDIUM)
-    {
-        "title": "മലയാള ഭാഷ (Malayalam Language)",
-        "language": "ml",
-        "difficulty": "medium",
-        "category": "literature",
-        "content": "കേരളത്തിന്റെ മാതൃഭാഷയാണ് മലയാളം. പച്ചപ്പും കായലുകളും നിറഞ്ഞ മനോഹരമായ നാടാണ് കേരളം. നിരന്തരമായ അഭ്യാസത്തിലൂടെ മലയാളം ടൈപ്പിംഗ് വേഗത വർദ്ധിപ്പിക്കാം."
-    },
-    # MALAYALAM (HARD)
-    {
-        "title": "അക്ഷര സൗന്ദര്യം (Literature & Thought)",
-        "language": "ml",
-        "difficulty": "hard",
-        "category": "culture",
-        "content": "സാഹിത്യവും സംസ്കാരവും സമന്വയിക്കുന്നതാണ് നമ്മുടെ പൈതൃകം. ചിന്തകളെ വാക്കുകളാക്കി മാറ്റുന്നതിലൂടെ സർഗ്ഗാത്മകത വികസിക്കുന്നു. ഓരോ ദിവസത്തെയും കഠിനാധ്വാനം വിജയത്തിലേക്കുള്ള ചവിട്ടുപടിയാണ്."
-    },
     # SPANISH (EASY)
     {
         "title": "El Sol de la Mañana (Morning Sun)",
@@ -94,21 +70,37 @@ SAMPLE_PASSAGES = [
         "category": "typing",
         "content": "Escribir con rapidez y precisión requiere práctica constante. Mantener una postura cómoda y los ojos en la pantalla ayuda a mejorar la velocidad cada día."
     },
-    # HINDI (EASY)
+    # FRENCH (EASY)
     {
-        "title": "सुबह की शुरुआत (Morning Walk)",
-        "language": "hi",
+        "title": "Le Matin Calme (Calm Morning)",
+        "language": "fr",
         "difficulty": "easy",
         "category": "lifestyle",
-        "content": "सुबह का सूरज बहुत सुहावना और चमकदार था। पेड़ों पर पक्षी मधुर गीत गा रहे थे। ठंडी हवा चल रही थी।"
+        "content": "Le soleil du matin illuminait doucement le ciel bleu. Les oiseaux chantaient joyeusement dans les arbres verts du jardin."
     },
-    # HINDI (MEDIUM)
+    # FRENCH (MEDIUM)
     {
-        "title": "अभ्यास का महत्व (Importance of Practice)",
-        "language": "hi",
+        "title": "La Pratique Quotidienne (Daily Practice)",
+        "language": "fr",
         "difficulty": "medium",
-        "category": "education",
-        "content": "निरंतर अभ्यास से कठिन काम भी आसान हो जाता है। सही दिशा में किया गया प्रयास हमेशा सफलता दिलाता है।"
+        "category": "typing",
+        "content": "Taper avec rapidité et précision demande de la patience et un entraînement régulier. Une bonne posture permet de progresser chaque jour sans effort excessif."
+    },
+    # GERMAN (EASY)
+    {
+        "title": "Der Schöne Morgen (Beautiful Morning)",
+        "language": "de",
+        "difficulty": "easy",
+        "category": "lifestyle",
+        "content": "Die Morgensonne schien hell am blauen Himmel. Die Vögel sangen fröhlich in den grünen Bäumen des Gartens."
+    },
+    # GERMAN (MEDIUM)
+    {
+        "title": "Die Kunst des Tippens (The Art of Typing)",
+        "language": "de",
+        "difficulty": "medium",
+        "category": "typing",
+        "content": "Schnelles und fehlerfreies Tippen erfordert kontinuierliche Übung und Konzentration. Mit der richtigen Tastentechnik steigert man die Schreibgeschwindigkeit jeden Tag."
     }
 ]
 
