@@ -68,6 +68,34 @@ with app.app_context():
     except Exception as e:
         print(f"Startup initialization notice: {e}")
 
-# Vercel WSGI entry point
-# Exports the Flask 'app' instance
+# Vercel WSGI entry point & PATH_INFO Normalizer Middleware
+class VercelPathFixMiddleware:
+    """
+    Vercel serverless rewrites (e.g. source: /(.*) -> destination: /api/index.py)
+    often deliver PATH_INFO containing the destination function name (/api/index.py or /api/index).
+    This middleware reconstructs the true requested client URL from Vercel's edge headers
+    (x-matched-path, x-forwarded-uri) or strips the internal destination prefix so Flask's router
+    matches routes (/ -> practice.index, /competitions/ -> competition.list_competitions, etc.).
+    """
+    def __init__(self, wsgi_app):
+        self.wsgi_app = wsgi_app
+
+    def __call__(self, environ, start_response):
+        matched_path = (
+            environ.get('HTTP_X_MATCHED_PATH') or
+            environ.get('HTTP_X_FORWARDED_URI') or
+            environ.get('HTTP_X_ORIGINAL_URL') or
+            environ.get('PATH_INFO', '')
+        )
+        if matched_path.startswith('/api/index.py'):
+            matched_path = matched_path[len('/api/index.py'):] or '/'
+        elif matched_path.startswith('/api/index'):
+            matched_path = matched_path[len('/api/index'):] or '/'
+        elif not matched_path:
+            matched_path = '/'
+
+        environ['PATH_INFO'] = matched_path
+        return self.wsgi_app(environ, start_response)
+
+app.wsgi_app = VercelPathFixMiddleware(app.wsgi_app)
 
