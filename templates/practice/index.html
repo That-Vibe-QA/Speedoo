@@ -207,7 +207,8 @@ window.scrollTo(0, 0);
 document.addEventListener('DOMContentLoaded', () => {
   let currentPassages = [];
   let selectedPassage = null;
-  let currentLanguage = localStorage.getItem('speedoo-lang') || 'en';
+  // Always default to English on initial page load
+  let currentLanguage = sessionStorage.getItem('speedoo-lang') || 'en';
   let currentMode = 'timed';
   let currentDuration = 60;
   let currentDifficulty = 'medium';

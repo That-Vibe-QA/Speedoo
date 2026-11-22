@@ -187,15 +187,19 @@
         });
       }
 
-      // Compact Language Selector Dropdown logic
+      // Compact Language Selector Dropdown logic: Always default to 'en' (English) on fresh page load
       const langBtn = document.getElementById('langDropdownBtn');
       const langMenu = document.getElementById('langMenu');
       const currentLangLabel = document.getElementById('currentLangLabel');
       const langOptions = document.querySelectorAll('.lang-opt');
 
-      const savedLang = localStorage.getItem('speedoo-lang') || 'en';
+      // Ensure fresh sessions start in English
+      sessionStorage.removeItem('speedoo-lang');
+      localStorage.removeItem('speedoo-lang');
+      const activeLang = 'en';
+
       if (currentLangLabel) {
-        currentLangLabel.innerText = savedLang.toUpperCase();
+        currentLangLabel.innerText = 'EN';
       }
 
       function updateActiveOption(lang) {
@@ -207,7 +211,7 @@
           }
         });
       }
-      updateActiveOption(savedLang);
+      updateActiveOption(activeLang);
 
       if (langBtn && langMenu) {
         langBtn.addEventListener('click', (e) => {
@@ -221,7 +225,7 @@
           opt.addEventListener('click', (e) => {
             e.stopPropagation();
             const chosenLang = opt.getAttribute('data-lang');
-            localStorage.setItem('speedoo-lang', chosenLang);
+            sessionStorage.setItem('speedoo-lang', chosenLang);
             if (currentLangLabel) {
               currentLangLabel.innerText = chosenLang.toUpperCase();
             }
