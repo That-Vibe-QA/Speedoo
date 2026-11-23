@@ -6,7 +6,25 @@
 <section class="landing-hero">
   <!-- Big Speedoo Hero Logo & Branding -->
   <div class="landing-logo-container">
-    <div class="landing-bolt">⚡</div>
+    <div class="landing-bolt">
+      <svg class="lightning-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="lightningGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#FFD200"/>
+            <stop offset="50%" stop-color="#FF7A00"/>
+            <stop offset="100%" stop-color="#FF3B30"/>
+          </linearGradient>
+          <filter id="lightningGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        <path d="M18.5 2.5L7 16.5H16L13.5 29.5L25 15.5H16L18.5 2.5Z" fill="url(#lightningGrad)" />
+      </svg>
+    </div>
     <h1 class="landing-brand-title">{{ app_name }}</h1>
     <div class="landing-company-badge">A {{ company_name }} Product</div>
   </div>
@@ -68,3 +86,4 @@
   </div>
 </section>
 {% endblock %}
+
