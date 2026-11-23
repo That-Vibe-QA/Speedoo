@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Speedoo — Type fast. Compete. Win.{% endblock %}
+
+{% block content %}
+<section class="landing-hero">
+  <!-- Big Speedoo Hero Logo & Branding -->
+  <div class="landing-logo-container">
+    <div class="landing-bolt">⚡</div>
+    <h1 class="landing-brand-title">{{ app_name }}</h1>
+    <div class="landing-company-badge">A {{ company_name }} Product</div>
+  </div>
+
+  <p class="landing-tagline">{{ app_tagline }}</p>
+
+  <p class="landing-intro">
+    Speedoo is a precision-engineered, server-validated global typing platform built for competitive typists and everyday learners. 
+    Measure words per minute with millisecond accuracy, master tactile rhythm across 8 international languages, and race live opponents in synchronized global competitions.
+  </p>
+
+  <div class="landing-cta-group">
+    <a href="{{ url_for('practice.index') }}" class="btn btn-primary btn-lg landing-explore-btn">
+      <span>Start Exploring</span>
+      <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none">
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+        <polyline points="12 5 19 12 12 19"></polyline>
+      </svg>
+    </a>
+    <a href="{{ url_for('competition.list_competitions') }}" class="btn btn-secondary btn-lg">
+      🏆 Browse Competitions
+    </a>
+  </div>
+</section>
+
+<!-- About Speedoo & Core Highlights -->
+<section class="landing-features">
+  <div class="feature-card">
+    <div class="feature-icon">🎯</div>
+    <h3>Precision Keystroke Scoring</h3>
+    <p>Every keystroke is sequenced and verified server-side with millisecond accuracy. Get exact Net WPM, accuracy %, and deep mistake diagnostics.</p>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-icon">🌐</div>
+    <h3>Global Multilingual Library</h3>
+    <p>Type in English, Spanish, French, German, Italian, Portuguese, Dutch, and Polish with fully validated Unicode text streams and native keyboards.</p>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-icon">⚡</div>
+    <h3>Synchronized Live Races</h3>
+    <p>Join or host private competitions using join codes. Race opponents in synchronized real-time dashes and compete for the top of the leaderboard.</p>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-icon">🔍</div>
+    <h3>Interactive Mistake Map</h3>
+    <p>Review exact keystroke errors with word-by-word visual highlight maps and letter breakdown tables to pinpoint where your fingers slip.</p>
+  </div>
+</section>
+
+<!-- Quick Explore Banner -->
+<section class="landing-banner">
+  <h2>Ready to test your fingers?</h2>
+  <p>No mandatory setup or credit card required. Jump straight into practice or login to track your lifetime stats.</p>
+  <div style="margin-top: 1.25rem;">
+    <a href="{{ url_for('practice.index') }}" class="btn btn-primary btn-lg">Start Exploring Speedoo</a>
+  </div>
+</section>
+{% endblock %}

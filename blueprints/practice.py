@@ -7,8 +7,14 @@ from scoring import ScoringService
 practice_bp = Blueprint('practice', __name__)
 
 @practice_bp.route('/')
+def home():
+    """Speedoo Landing Homepage."""
+    return render_template('home.html')
+
+
+@practice_bp.route('/practice')
 def index():
-    """Home and practice typing screen."""
+    """Interactive practice typing screen."""
     return render_template('practice/index.html')
 
 

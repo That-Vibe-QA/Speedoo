@@ -1,22 +1,8 @@
 {% extends "base.html" %}
 
-{% block title %}Speedoo{% endblock %}
+{% block title %}Speedoo — Practice Typing{% endblock %}
 
 {% block content %}
-<!-- Welcoming Hero -->
-<section class="hero">
-  <h1>Master Your Typing Speed</h1>
-  <div class="hero-tagline">{{ app_tagline }}</div>
-  <p class="hero-description">
-    Test your words per minute and keystroke accuracy with precision server scoring.
-    Practice on your own or battle against other typists in synchronized competitions.
-  </p>
-  <div class="hero-actions">
-    <a href="#typingArea" class="btn btn-primary btn-lg" id="jumpPracticeBtn">Practice Typing</a>
-    <a href="{{ url_for('competition.join') }}" class="btn btn-secondary btn-lg">Join Competition</a>
-  </div>
-</section>
-
 <!-- Main Practice Station -->
 <section id="typingArea" style="margin-top: 1.5rem;">
   <!-- Test Configuration Bar -->

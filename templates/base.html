@@ -62,7 +62,7 @@
   <!-- Navigation Header -->
   <header>
     <nav class="navbar">
-      <a href="{{ url_for('practice.index') }}" class="nav-brand">
+      <a href="{{ url_for('practice.home') }}" class="nav-brand">
         <span class="brand-icon">⚡</span>
         <div class="brand-text-container">
           <span class="brand-title">{{ app_name }}</span>
@@ -71,6 +71,11 @@
       </a>
 
       <ul class="nav-menu">
+        <li>
+          <a href="{{ url_for('practice.home') }}" class="nav-link {% if request.endpoint == 'practice.home' %}active{% endif %}">
+            Home
+          </a>
+        </li>
         <li>
           <a href="{{ url_for('practice.index') }}" class="nav-link {% if request.endpoint == 'practice.index' %}active{% endif %}">
             Practice
