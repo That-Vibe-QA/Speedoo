@@ -224,7 +224,7 @@
   {% endif %}
 
   <!-- Flash Messages -->
-  <main class="container">
+  <main class="container {% if request.endpoint == 'practice.home' %}container-landing{% endif %}">
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <div class="flash-container">
