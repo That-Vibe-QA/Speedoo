@@ -101,6 +101,70 @@ SAMPLE_PASSAGES = [
         "difficulty": "medium",
         "category": "typing",
         "content": "Schnelles und fehlerfreies Tippen erfordert kontinuierliche Übung und Konzentration. Mit der richtigen Tastentechnik steigert man die Schreibgeschwindigkeit jeden Tag."
+    },
+    # ITALIAN (EASY)
+    {
+        "title": "Il Mattino Luminoso (Bright Morning)",
+        "language": "it",
+        "difficulty": "easy",
+        "category": "lifestyle",
+        "content": "Il sole del mattino risplendeva nel cielo sereno. Gli uccelli cantavano felici tra gli alberi verdi della collina."
+    },
+    # ITALIAN (MEDIUM)
+    {
+        "title": "L'Arte della Digitazione (The Art of Typing)",
+        "language": "it",
+        "difficulty": "medium",
+        "category": "typing",
+        "content": "Scrivere a macchina con precisione richiede costanza e dedizione. Tenere le mani nella posizione corretta aiuta a digitare velocemente senza stancarsi."
+    },
+    # PORTUGUESE (EASY)
+    {
+        "title": "A Manhã Ensolarada (Sunny Morning)",
+        "language": "pt",
+        "difficulty": "easy",
+        "category": "lifestyle",
+        "content": "O sol da manhã brilhava forte no céu azul. Os pássaros cantavam alegremente nas árvores floridas do parque."
+    },
+    # PORTUGUESE (MEDIUM)
+    {
+        "title": "A Prática da Digitação (Typing Practice)",
+        "language": "pt",
+        "difficulty": "medium",
+        "category": "typing",
+        "content": "Digitar com velocidade e exatidão exige treino diário e atenção. Manter a postura ereta facilita alcançar todas as teclas com rapidez e conforto."
+    },
+    # DUTCH (EASY)
+    {
+        "title": "De Ochtendwandeling (Morning Walk)",
+        "language": "nl",
+        "difficulty": "easy",
+        "category": "lifestyle",
+        "content": "De ochtendzon scheen helder aan de blauwe hemel. De vogels zongen vrolijk in de groene bomen van het park."
+    },
+    # DUTCH (MEDIUM)
+    {
+        "title": "Snel en Nauwkeurig Typen (Fast & Accurate Typing)",
+        "language": "nl",
+        "difficulty": "medium",
+        "category": "typing",
+        "content": "Blind typen met hoge snelheid vereist regelmatige oefening en focus. Een goede vingerzetting op het toetsenbord zorgt voor een soepel en foutloos ritme."
+    },
+    # POLISH (EASY)
+    {
+        "title": "Poranny Spacer (Morning Walk)",
+        "language": "pl",
+        "difficulty": "easy",
+        "category": "lifestyle",
+        "content": "Poranne słońce świeciło jasno na bezchmurnym niebie. Ptaki śpiewały radośnie w zielonych koronach drzew."
+    },
+    # POLISH (MEDIUM)
+    {
+        "title": "Sztuka Szybkiego Pisania (Art of Fast Typing)",
+        "language": "pl",
+        "difficulty": "medium",
+        "category": "typing",
+        "content": "Szybkie i precyzyjne pisanie na klawiaturze wymaga regularnego treningu. Prawidłowe ułożenie dłoni pozwala pisać płynnie bez patrzenia na klawisze."
     }
 ]
 
