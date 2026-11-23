@@ -59,7 +59,8 @@
   {% block extra_head %}{% endblock %}
 </head>
 <body>
-  <!-- Navigation Header -->
+  <!-- Navigation Header (hidden on homepage; appears when exploring practice, competitions, etc.) -->
+  {% if request.endpoint != 'practice.home' %}
   <header>
     <nav class="navbar">
       <a href="{{ url_for('practice.home') }}" class="nav-brand">
@@ -220,6 +221,7 @@
       </div>
     </nav>
   </header>
+  {% endif %}
 
   <!-- Flash Messages -->
   <main class="container">
