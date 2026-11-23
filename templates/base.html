@@ -47,10 +47,11 @@
   }
   </script>
 
-  <!-- Prevent theme flash -->
+  <!-- Prevent theme flash & enforce default dark mode -->
   <script>
     (function() {
-      const saved = localStorage.getItem('speedoo-theme') || 'dark';
+      // Default to 'dark' for all visits unless explicitly set in session
+      const saved = sessionStorage.getItem('speedoo-theme') || 'dark';
       document.documentElement.setAttribute('data-theme', saved);
     })();
   </script>
@@ -272,7 +273,7 @@
           const active = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
           const next = active === 'light' ? 'dark' : 'light';
           document.documentElement.setAttribute('data-theme', next);
-          localStorage.setItem('speedoo-theme', next);
+          sessionStorage.setItem('speedoo-theme', next);
           updateIcon(next);
         });
       }
