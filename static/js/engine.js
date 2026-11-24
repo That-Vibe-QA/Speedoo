@@ -151,7 +151,9 @@ class SpeedooEngine {
     }
 
     // Capture input (single character or multi-byte Unicode/composition char)
-    if (e.key && e.key.length >= 1 && e.key !== 'Enter' && e.key !== 'Tab' && e.key !== 'Escape' && e.key !== 'Shift' && e.key !== 'Alt') {
+    // Ignore modifier/navigation/non-character keys (e.g., CapsLock, Insert, ArrowLeft, F1-F12)
+    // Allow single-character keys (including Unicode/combining characters where Array.from(e.key).length === 1)
+    if (e.key && Array.from(e.key.normalize('NFC')).length === 1) {
       e.preventDefault();
 
       if (!this.hasStarted) {
