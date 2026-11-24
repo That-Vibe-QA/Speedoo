@@ -241,7 +241,8 @@
     {% block content %}{% endblock %}
   </main>
 
-  <!-- Footer -->
+  <!-- Footer (hidden on homepage) -->
+  {% if request.endpoint != 'practice.home' %}
   <footer class="footer">
     <div style="margin-bottom: 0.5rem;">
       <strong>Speedoo</strong> — {{ app_tagline }}
@@ -253,6 +254,7 @@
       &copy; {{ current_year }} {{ company_name }}. All rights reserved.
     </div>
   </footer>
+  {% endif %}
 
   <script src="{{ url_for('static', filename='js/engine.js') }}"></script>
   <script>
