@@ -20,8 +20,8 @@
     <div class="control-group" id="durationGroup">
       <span class="control-label">Time:</span>
       <div class="pill-group" id="durationSelector">
-        <button type="button" class="pill-btn" data-duration="30">30s</button>
-        <button type="button" class="pill-btn active" data-duration="60">1m</button>
+        <button type="button" class="pill-btn active" data-duration="30">30s</button>
+        <button type="button" class="pill-btn" data-duration="60">1m</button>
         <button type="button" class="pill-btn" data-duration="120">2m</button>
         <button type="button" class="pill-btn" data-duration="300">5m</button>
       </div>
@@ -31,8 +31,8 @@
     <div class="control-group">
       <span class="control-label">Difficulty:</span>
       <div class="pill-group" id="difficultySelector">
-        <button type="button" class="pill-btn" data-difficulty="easy">Easy</button>
-        <button type="button" class="pill-btn active" data-difficulty="medium">Medium</button>
+        <button type="button" class="pill-btn active" data-difficulty="easy">Easy</button>
+        <button type="button" class="pill-btn" data-difficulty="medium">Medium</button>
         <button type="button" class="pill-btn" data-difficulty="hard">Hard</button>
       </div>
     </div>
@@ -50,7 +50,7 @@
   <!-- Live Stats Display -->
   <div class="stats-bar">
     <div class="stat-box">
-      <div class="stat-value" id="displayTimer">60s</div>
+      <div class="stat-value" id="displayTimer">30s</div>
       <div class="stat-label" id="timerLabel">Time Remaining</div>
     </div>
     <div class="stat-box">
@@ -196,8 +196,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Always default to English on initial page load
   let currentLanguage = sessionStorage.getItem('speedoo-lang') || 'en';
   let currentMode = 'timed';
-  let currentDuration = 60;
-  let currentDifficulty = 'medium';
+  let currentDuration = 30;
+  let currentDifficulty = 'easy';
   let engine = null;
 
   const displayTimer = document.getElementById('displayTimer');
