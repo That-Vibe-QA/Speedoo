@@ -122,6 +122,58 @@ class SpeedooEngine {
     this.flushEvents();
   }
 
+  playKeySound(type = 'key') {
+    if (window.speedooSoundEnabled === false) return;
+    try {
+      if (!this._audioCtx) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        this._audioCtx = new AudioCtx();
+      }
+      if (this._audioCtx.state === 'suspended') {
+        this._audioCtx.resume();
+      }
+      const ctx = this._audioCtx;
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      if (type === 'error') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.exponentialRampToValueAtTime(75, now + 0.06);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.065);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.07);
+      } else if (type === 'space' || type === 'backspace') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(type === 'space' ? 220 : 190, now);
+        osc.frequency.exponentialRampToValueAtTime(90, now + 0.045);
+        gain.gain.setValueAtTime(0.09, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.055);
+      } else {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(520 + (Math.random() * 40 - 20), now);
+        osc.frequency.exponentialRampToValueAtTime(140, now + 0.03);
+        gain.gain.setValueAtTime(0.075, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.04);
+      }
+    } catch (e) {
+      // Ignore audio errors if blocked by browser autoplay policy
+    }
+  }
+
   handleKeyDown(e) {
     if (this.isFinished) return;
 
@@ -136,6 +188,7 @@ class SpeedooEngine {
     if (e.key === 'Backspace') {
       e.preventDefault();
       if (!this.hasStarted) return;
+      this.playKeySound('backspace');
       this.backspaces += 1;
       if (this.typedChars.length > 0) {
         this.typedChars.pop();
@@ -169,8 +222,10 @@ class SpeedooEngine {
         this.totalScoredKeystrokes += 1;
         if (char === targetChar) {
           this.correctKeystrokes += 1;
+          this.playKeySound(char === ' ' ? 'space' : 'key');
         } else {
           this.incorrectAttempts += 1;
+          this.playKeySound('error');
           this.recordMistake(curIndex, targetChar, char);
         }
 

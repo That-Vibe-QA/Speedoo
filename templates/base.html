@@ -203,6 +203,20 @@
           </div>
         </div>
 
+        <!-- Sound Effects Toggle Button -->
+        <button type="button" class="theme-toggle-btn" id="soundToggleBtn" aria-label="Toggle typing sound effects" title="Toggle typing sound">
+          <svg id="soundIconOn" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          </svg>
+          <svg id="soundIconOff" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+          </svg>
+        </button>
+
         <!-- Theme Toggle Button -->
         <button type="button" class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle dark/light theme" title="Toggle theme">
           <svg id="themeIcon" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -284,6 +298,30 @@
           document.documentElement.setAttribute('data-theme', next);
           sessionStorage.setItem('speedoo-theme', next);
           updateIcon(next);
+        });
+      }
+
+      // Sound Effects Toggle logic
+      const soundBtn = document.getElementById('soundToggleBtn');
+      const soundIconOn = document.getElementById('soundIconOn');
+      const soundIconOff = document.getElementById('soundIconOff');
+      window.speedooSoundEnabled = localStorage.getItem('speedoo-sound') !== 'off';
+
+      function updateSoundIcon(enabled) {
+        if (!soundIconOn || !soundIconOff) return;
+        soundIconOn.style.display = enabled ? 'block' : 'none';
+        soundIconOff.style.display = enabled ? 'none' : 'block';
+        if (soundBtn) {
+          soundBtn.title = enabled ? 'Sound: ON (click to mute)' : 'Sound: OFF (click to enable)';
+        }
+      }
+
+      updateSoundIcon(window.speedooSoundEnabled);
+      if (soundBtn) {
+        soundBtn.addEventListener('click', () => {
+          window.speedooSoundEnabled = !window.speedooSoundEnabled;
+          localStorage.setItem('speedoo-sound', window.speedooSoundEnabled ? 'on' : 'off');
+          updateSoundIcon(window.speedooSoundEnabled);
         });
       }
 

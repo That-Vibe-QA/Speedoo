@@ -892,13 +892,21 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .char-cursor {
   background-color: var(--char-cursor);
   color: #000;
-  border-radius: 2px;
-  animation: pulse 1s infinite;
+  border-radius: 3px;
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.45);
+  transition: background-color 0.1s ease, transform 0.08s ease-out;
+  animation: smoothCaret 1.05s ease-in-out infinite;
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.65; }
+@keyframes smoothCaret {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 8px rgba(251, 191, 36, 0.5);
+  }
+  50% {
+    opacity: 0.62;
+    box-shadow: 0 0 2px rgba(251, 191, 36, 0.15);
+  }
 }
 
 .char-pending {
