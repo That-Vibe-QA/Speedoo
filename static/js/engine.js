@@ -135,40 +135,54 @@ class SpeedooEngine {
       }
       const ctx = this._audioCtx;
       const now = ctx.currentTime;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
 
-      if (type === 'error') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(150, now);
-        osc.frequency.exponentialRampToValueAtTime(75, now + 0.06);
-        gain.gain.setValueAtTime(0.08, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.065);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now);
-        osc.stop(now + 0.07);
-      } else if (type === 'space' || type === 'backspace') {
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(type === 'space' ? 220 : 190, now);
-        osc.frequency.exponentialRampToValueAtTime(90, now + 0.045);
-        gain.gain.setValueAtTime(0.09, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now);
-        osc.stop(now + 0.055);
-      } else {
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(520 + (Math.random() * 40 - 20), now);
-        osc.frequency.exponentialRampToValueAtTime(140, now + 0.03);
-        gain.gain.setValueAtTime(0.075, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now);
-        osc.stop(now + 0.04);
+      // Lazily create a reusable short white-noise buffer for realistic switch click
+      if (!this._noiseBuffer) {
+        const bufferSize = Math.floor(ctx.sampleRate * 0.04);
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.25));
+        }
+        this._noiseBuffer = buffer;
       }
+
+      // 1. Crisp mechanical switch click (filtered noise burst)
+      const noise = ctx.createBufferSource();
+      noise.buffer = this._noiseBuffer;
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(
+        type === 'error' ? 900 : (type === 'space' || type === 'backspace' ? 1600 : 2800 + Math.random() * 500),
+        now
+      );
+      filter.Q.setValueAtTime(type === 'error' ? 1.5 : 2.2, now);
+
+      const noiseGain = ctx.createGain();
+      noiseGain.gain.setValueAtTime(type === 'error' ? 0.14 : 0.22, now);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.025);
+
+      noise.connect(filter);
+      filter.connect(noiseGain);
+      noiseGain.connect(ctx.destination);
+      noise.start(now);
+      noise.stop(now + 0.03);
+
+      // 2. Subtle keycap bottom-out thock (short low-end impulse)
+      const thock = ctx.createOscillator();
+      const thockGain = ctx.createGain();
+      thock.type = 'sine';
+      const baseFreq = type === 'error' ? 95 : (type === 'space' || type === 'backspace' ? 115 : 155 + Math.random() * 20);
+      thock.frequency.setValueAtTime(baseFreq, now);
+      thock.frequency.exponentialRampToValueAtTime(45, now + 0.022);
+      thockGain.gain.setValueAtTime(type === 'error' ? 0.12 : 0.08, now);
+      thockGain.gain.exponentialRampToValueAtTime(0.001, now + 0.024);
+
+      thock.connect(thockGain);
+      thockGain.connect(ctx.destination);
+      thock.start(now);
+      thock.stop(now + 0.025);
     } catch (e) {
       // Ignore audio errors if blocked by browser autoplay policy
     }
@@ -376,6 +390,16 @@ class SpeedooEngine {
   async finish(fromServer = false) {
     if (this.isFinished) return;
     this.isFinished = true;
+    if (fromServer && this.mode === 'timed' && this.remainingSeconds > 0) {
+      this.remainingSeconds = 0;
+      if (this.onTick) {
+        this.onTick({
+          elapsed: this.elapsedSeconds,
+          remaining: 0,
+          mode: this.mode
+        });
+      }
+    }
 
     if (this.timerInterval) clearInterval(this.timerInterval);
     if (this.syncInterval) clearInterval(this.syncInterval);
