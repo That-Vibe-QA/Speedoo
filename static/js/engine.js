@@ -191,6 +191,27 @@ class SpeedooEngine {
   handleKeyDown(e) {
     if (this.isFinished) return;
 
+    // Ctrl+Backspace / Alt+Backspace / Cmd+Backspace: delete whole current word
+    if (e.key === 'Backspace' && (e.ctrlKey || e.metaKey || e.altKey)) {
+      e.preventDefault();
+      if (!this.hasStarted || this.typedChars.length === 0) return;
+      this.playKeySound('backspace');
+      // Skip any trailing spaces first, then delete back to the previous space
+      while (this.typedChars.length > 0 && this.typedChars[this.typedChars.length - 1] === ' ') {
+        this.typedChars.pop();
+        this.backspaces += 1;
+        this.eventsQueue.push({ seq: this.nextSeq++, type: 'backspace', client_t: performance.now() });
+      }
+      while (this.typedChars.length > 0 && this.typedChars[this.typedChars.length - 1] !== ' ') {
+        this.typedChars.pop();
+        this.backspaces += 1;
+        this.eventsQueue.push({ seq: this.nextSeq++, type: 'backspace', client_t: performance.now() });
+      }
+      this.computeMetrics();
+      this.renderText();
+      return;
+    }
+
     // Disallow modifiers (except Shift, AltGraph for international keyboards)
     if (e.ctrlKey || e.metaKey) {
       if (e.key === 'v' || e.key === 'V') {
